@@ -3,6 +3,8 @@ import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import BackLink from '../../components/BackLink.astro';
 import ExerciseImage from '../../components/ExerciseImage.astro';
+import ExerciseDone from '../../components/exercise/ExerciseDone.astro';
+import HoldTimer from '../../components/exercise/HoldTimer.astro';
 import RedFlags from '../../components/RedFlags.astro';
 import { SECTION_COPY, sectionPath, isSection } from '../../lib/section';
 
@@ -174,7 +176,14 @@ const pageTitle = `${area.name_en} ${copy.shortLabel}`;
               <span>{item.data.safety_en}</span>
             </div>
           )}
-          
+
+          <div class="iactions">
+            <ExerciseDone itemId={item.data.id} />
+            {typeof item.data.hold_seconds === 'number' && (
+              <HoldTimer seconds={item.data.hold_seconds} />
+            )}
+          </div>
+
         </div>
       </article>
     ))}
@@ -201,6 +210,11 @@ const pageTitle = `${area.name_en} ${copy.shortLabel}`;
   text-wrap: balance;
 }
 .hero p { margin: 0; color: var(--ink-2); max-width: 56ch; font-size: calc(17px * var(--scale)); }
+.progress {
+  margin: 10px 0 0; font-family: var(--f-mono);
+  font-size: calc(13px * var(--scale)); color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
 
 .btn-share-page {
   font-family: var(--f-display);
@@ -243,12 +257,25 @@ const pageTitle = `${area.name_en} ${copy.shortLabel}`;
   position: relative; background: var(--slot); border-bottom: 1px solid var(--line);
   aspect-ratio: 4/3; display: grid; place-items: center; overflow: hidden;
 }
-/* A robust figure style for child images */
-.figure :global(.exercise-image) {
-  width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 0;
+/* Raster illustrations fill the fixed 4:3 frame with `contain`: a cropped
+   clinical photograph can cut off the hand placement or end range the
+   exercise is about. Letterboxing is the lesser cost. (`cover` here would
+   crop; the old `.exercise-image` selector matched nothing.) */
+.figure :global(.shot__img) {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+}
+/* The deterministic figure brings its own caption and motion controls below
+   the art, so its frame is content-sized instead of a fixed-ratio crop box. */
+.figure:has(.efig) {
+  aspect-ratio: auto; overflow: visible; place-items: stretch;
+  padding: 12px 12px 14px;
 }
 
 .ibody { padding: 17px 19px 20px; display: grid; gap: 13px; }
+.iactions {
+  display: grid; gap: 4px; padding-top: 12px;
+  border-top: 1px solid var(--line); justify-items: start;
+}
 
 .ihead { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
 .inum { font-family: var(--f-mono); font-size: calc(12.5px * var(--scale)); font-weight: 600; color: var(--ink-3); font-variant-numeric: tabular-nums; }
@@ -356,15 +383,25 @@ const pageTitle = `${area.name_en} ${copy.shortLabel}`;
       });
     });
 
-    // Deep-link anchor focus & scroll handling
+    // Deep-link anchor focus & scroll handling. The hash is untrusted input
+    // (a shared link can contain anything), so it is never passed raw to
+    // querySelector — CSS.escape plus a same-page id lookup keeps a crafted
+    // fragment from throwing or matching outside the item list.
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
     function handleAnchor() {
-      const hash = window.location.hash;
-      if (!hash) return;
-      const target = document.querySelector(hash) as HTMLElement | null;
-      if (target) {
+      const raw = window.location.hash.slice(1);
+      if (!raw) return;
+      let target: HTMLElement | null = null;
+      try {
+        target = document.getElementById(raw) as HTMLElement | null;
+        if (!target) target = document.querySelector(`#${CSS.escape(raw)}`) as HTMLElement | null;
+      } catch {
+        target = null;
+      }
+      if (target && target.classList.contains('item')) {
         document.querySelectorAll('.item.is-targeted').forEach((el) => el.classList.remove('is-targeted'));
         target.classList.add('is-targeted');
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
         target.focus({ preventScroll: true });
       }
     }

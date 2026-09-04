@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="src/Domain.fs" />
+    <Compile Include="src/Safety.fs" />
+    <Compile Include="src/Content.fs" />
+    <Compile Include="src/Figures.fs" />
+    <Compile Include="src/Specs.fs" />
+    <Compile Include="src/Checks.fs" />
+    <Compile Include="src/App.fs" />
+  </ItemGroup>
+
+</Project>

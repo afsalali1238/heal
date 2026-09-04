@@ -1,0 +1,142 @@
+name: Fable
+
+# The from-scratch F# rebuild. Independent of the Astro app's CI:
+# this compiles F# with Fable and renders the static demo page.
+on:
+  push:
+    paths:
+      - 'physio-fable/**'
+      - '.github/workflows/fable.yml'
+  pull_request:
+    paths:
+      - 'physio-fable/**'
+      - '.github/workflows/fable.yml'
+
+defaults:
+  run:
+    working-directory: physio-fable
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # Both runtimes: the Fable global tool floats to latest stable, so it
+    # may target a newer framework than the library itself (net8.0).
+    # Installing 8 + 9 covers either direction (7-second host failure seen
+    # 2026-09-04 when only 8 was present).
+    - name: Use .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    # No lockfile yet (fresh project) — plain install, same as Vercel uses.
+    - name: Install JS dependencies
+      run: npm install
+
+    # Latest stable Fable, deliberately unpinned: pin only when a release
+    # breaks us, so the scaffold never rots on a yanked exact version.
+    - name: Install Fable
+      run: dotnet tool install --global fable
+
+    - name: Compile F# to JS
+      # Output is teed to a file so the failure reporter below can quote it.
+      run: |
+        $HOME/.dotnet/tools/fable Client.fsproj --outDir build 2>&1 | tee "$RUNNER_TEMP/fable.log"
+        test ${PIPESTATUS[0]} -eq 0
+
+    # The sandbox that authors this repo cannot download Actions logs, so a
+    # red compile posts its own error text back onto the PR as a comment.
+    - name: Report compile error to PR
+      if: failure()
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        PR=$(gh pr list --head "${{ github.head_ref || github.ref_name }}" --json number --jq '.[0].number // empty')
+        if [ -z "$PR" ]; then echo "no PR for this branch, skipping report"; exit 0; fi
+        { echo '### Fable compile failed'; echo; echo '```'; tail -n 60 "$RUNNER_TEMP/fable.log"; echo '```'; } > "$RUNNER_TEMP/pr-body.md"
+        gh pr comment "$PR" --body-file "$RUNNER_TEMP/pr-body.md"
+
+    - name: Render static page
+      run: node scripts/render.mjs
+
+    - name: Upload demo site
+      uses: actions/upload-artifact@v4
+      with:
+        name: physio-fable-site
+        path: physio-fable/dist
+        retention-days: 7
+
+  # Real runtime QA on headless Chromium: drives the built site (gate flow,
+  # timers, done persistence, search, text size, overflow, dark theme) and
+  # posts the report back onto the PR, since Actions logs are unreadable
+  # from the authoring sandbox.
+  qa:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: physio-fable
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: |
+          8.0.x
+          9.0.x
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Install JS dependencies
+      run: npm install
+
+    - name: Install Chromium
+      run: npx playwright install chromium
+
+    - name: Install Fable
+      run: dotnet tool install --global fable
+
+    - name: Rebuild site
+      run: |
+        $HOME/.dotnet/tools/fable Client.fsproj --outDir build
+        npm run render
+
+    - name: Run runtime QA
+      id: qa
+      run: |
+        set -o pipefail
+        npm run qa 2>&1 | tee "$RUNNER_TEMP/qa.log" || echo "QA_FAILED=1" >> "$GITHUB_ENV"
+
+    - name: Report QA to PR
+      if: always()
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        PR=$(gh pr list --head "${{ github.head_ref || github.ref_name }}" --json number --jq '.[0].number // empty')
+        if [ -z "$PR" ]; then echo "no PR for this branch, skipping report"; exit 0; fi
+        { echo '### Runtime QA'; echo; echo '```'; tail -n 25 "$RUNNER_TEMP/qa.log" 2>/dev/null || echo '(no log)'; echo '```'; } > "$RUNNER_TEMP/qa-body.md"
+        gh pr comment "$PR" --body-file "$RUNNER_TEMP/qa-body.md"
+
+    - name: Fail on QA errors
+      if: env.QA_FAILED == '1'
+      run: exit 1

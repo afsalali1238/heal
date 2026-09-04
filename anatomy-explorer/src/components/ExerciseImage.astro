@@ -24,6 +24,8 @@
  */
 import { Image } from 'astro:assets';
 import { getImage } from '../lib/images';
+import ExerciseFigure from './exercise/ExerciseFigure.astro';
+import { figureItemFor } from '../data/anatomy/exercise-figures';
 
 interface Props {
   imageId?: string;
@@ -59,6 +61,20 @@ const usableAlt = typeof alt === 'string' && alt.trim().length > 0 ? alt.trim() 
  * website rather than as work in progress, and it is the wrong fact.
  */
 const onDisk = imageId ? await getImage(imageId) : null;
+/**
+ * Deterministic figure (A-019) — the primary illustration, not a fallback.
+ *
+ * One neutral demonstrator for every item is what PRD §8 actually asks for
+ * ("consistency matters more than any single image being beautiful"), and
+ * D-015 rejected generated rasters after they came back confidently wrong.
+ * The figure is a schematic of the item's own written steps with an honest
+ * awaiting-check caption; the written steps remain authoritative.
+ *
+ * A genuine clinic photograph (fine hand placement the rig cannot draw) can
+ * reclaim priority per item later via an `image_source`-style sheet field —
+ * a sheet change owned by the clinician, not a code change here.
+ */
+const figureItem = imageId ? figureItemFor(imageId) : undefined;
 // A 1x1 file is a build placeholder, not a usable clinical illustration.
 // Treat it as unavailable so Astro does not upscale an empty pixel into a
 // full-size figure on patient or preview pages.
@@ -85,7 +101,9 @@ const slotReason = !imageId
 ---
 
 {
-  resolved ? (
+  figureItem ? (
+    <ExerciseFigure itemId={figureItem} label={usableAlt ?? slotReason} />
+  ) : resolved ? (
     <figure class="shot">
       {isSvg ? (
         <img

@@ -48,6 +48,15 @@
 
   --warn: #B45309;        --warn-bg: #FEF3C7;       /* Warning Amber */
   --slot: #F3F4F6;        --slot-line: #D1D5DB;
+
+  /* Deterministic exercise figures (figure-svg.ts). Body + outline form the
+     neutral demonstrator; accent reuses the brand so figures match the UI. */
+  --fig-body: #8ea3c0;
+  --fig-line: #3d5370;
+  --fig-support: #b9c6d8;
+  --fig-floor: #cdd7e4;
+  --fig-accent: var(--brand);
+  --fig-halo: var(--brand);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -60,16 +69,23 @@
     --ink-3: #9CA3AF;
     --line: #374151;
     --line-2: #4B5563;
-    
+
     --brand: #38bdf8;
     --brand-ink: #0f172a;
-    
+
     --mobility: #60A5FA; --mobility-bg: #1E3A8A;
     --stretch: #FBBF24;  --stretch-bg: #78350F;
     --strengthen: #34D399; --strengthen-bg: #064E3B;
-    
+
     --warn: #FCD34D;     --warn-bg: #78350F;
     --slot: #111827;     --slot-line: #374151;
+
+    --fig-body: #7d94b5;
+    --fig-line: #dbe4f0;
+    --fig-support: #475569;
+    --fig-floor: #334155;
+    --fig-accent: var(--brand);
+    --fig-halo: var(--brand);
   }
 }
 
@@ -92,4 +108,11 @@
   
   --warn: #FCD34D;     --warn-bg: #78350F;
   --slot: #111827;     --slot-line: #374151;
+
+  --fig-body: #7d94b5;
+  --fig-line: #dbe4f0;
+  --fig-support: #475569;
+  --fig-floor: #334155;
+  --fig-accent: var(--brand);
+  --fig-halo: var(--brand);
 }

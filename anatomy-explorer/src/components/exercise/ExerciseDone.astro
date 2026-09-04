@@ -1,0 +1,101 @@
+---
+/**
+ * Device-local completion mark. PRD v1 scope ("local completion mark").
+ *
+ * This is a private checklist, not tracking: one `localStorage` key
+ * (`physio-done-v1`, an array of item ids), never transmitted anywhere —
+ * the page is static and has nowhere to send it. It exists because the top
+ * physio apps (PhysiApp, Rehab My Patient) all show program progress, and
+ * patients doing daily repetitions need to see where they got to.
+ */
+interface Props {
+  itemId: string;
+}
+const { itemId } = Astro.props;
+---
+
+<button type="button" class="done" data-done={itemId} aria-pressed="false">
+  <span class="done__box" aria-hidden="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9.5 18 20 6.5"/></svg>
+  </span>
+  <span data-done-label>Mark as done</span>
+</button>
+
+<style>
+  .done {
+    display: inline-flex; align-items: center; gap: 9px;
+    min-height: 44px; padding: 8px 16px 8px 10px; cursor: pointer;
+    background: transparent; color: var(--ink-2);
+    border: 1px dashed var(--line-2); border-radius: 999px;
+    font-family: var(--f-display); font-weight: 600;
+    font-size: calc(14px * var(--scale));
+  }
+  .done:hover { border-color: var(--strengthen); color: var(--strengthen); }
+  .done:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+  .done__box {
+    width: 26px; height: 26px; border-radius: 50%; flex: none;
+    border: 2px solid currentColor;
+    display: grid; place-items: center;
+  }
+  .done__box svg { width: 14px; height: 14px; opacity: 0; }
+  .done[aria-pressed="true"] {
+    background: var(--strengthen-bg); border-style: solid;
+    border-color: var(--strengthen); color: var(--strengthen);
+  }
+  .done[aria-pressed="true"] .done__box { background: var(--strengthen); border-color: var(--strengthen); color: #fff; }
+  .done[aria-pressed="true"] .done__box svg { opacity: 1; }
+  @media print { .done { display: none; } }
+</style>
+
+<script>
+  // One card per exercise means this block is emitted many times per page.
+  // Wiring is per-button and idempotent: already-wired buttons are skipped,
+  // and paint() simply re-renders state. Safe however Astro bundles this.
+  const KEY = 'physio-done-v1';
+
+  function read(): Set<string> {
+    try {
+      const raw = localStorage.getItem(KEY);
+      const arr = raw ? JSON.parse(raw) : [];
+      return new Set(Array.isArray(arr) ? arr.filter((x) => typeof x === 'string') : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function write(done: Set<string>): void {
+    try {
+      localStorage.setItem(KEY, JSON.stringify([...done]));
+    } catch {
+      /* Private browsing: the marks still work for this page load. */
+    }
+  }
+
+  function paint(): void {
+    const done = read();
+    for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-done]')) {
+      const on = done.has(btn.dataset.done!);
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      const label = btn.querySelector('[data-done-label]');
+      if (label) label.textContent = on ? 'Done' : 'Mark as done';
+    }
+    for (const el of document.querySelectorAll<HTMLElement>('[data-done-count]')) {
+      const ids = (el.dataset.doneCount ?? '').split(' ').filter(Boolean);
+      const n = ids.filter((id) => done.has(id)).length;
+      el.textContent = n === ids.length && ids.length > 0 ? `All ${ids.length} done` : `${n} of ${ids.length} done`;
+    }
+  }
+
+  for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-done]')) {
+    btn.addEventListener('click', () => {
+      const done = read();
+      const id = btn.dataset.done!;
+      if (done.has(id)) done.delete(id);
+      else done.add(id);
+      write(done);
+      paint();
+    });
+  }
+
+  paint();
+</script>

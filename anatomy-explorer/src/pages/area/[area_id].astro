@@ -16,6 +16,7 @@
  */
 import Base from '../../layouts/Base.astro';
 import BackLink from '../../components/BackLink.astro';
+import AreaMiniMap from '../../components/anatomy/AreaMiniMap.astro';
 import { getAreaChoices } from '../../data/anatomy/body-regions';
 import { SECTION_COPY, areaPath } from '../../lib/section';
 
@@ -57,10 +58,13 @@ const { choice } = Astro.props;
         <span>Share Area</span>
       </button>
     </div>
-    <p class="lede">
-      Your physiotherapist may have given you one of these or both. Follow only
-      what they went through with you.
-    </p>
+    <div class="area-intro">
+      <p class="lede">
+        Your physiotherapist may have given you one of these or both. Follow only
+        what they went through with you.
+      </p>
+      <AreaMiniMap areaId={choice.areaId} areaName={choice.name} />
+    </div>
   </div>
 
   <div class="routes">
@@ -127,6 +131,15 @@ const { choice } = Astro.props;
   line-height: 1.08; letter-spacing: -.02em; margin: 0 0 10px; text-wrap: balance;
 }
 .lede { margin: 0; color: var(--ink-2); max-width: 56ch; font-size: calc(17px * var(--scale)); }
+.area-intro {
+  display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: center;
+  margin-top: 14px;
+}
+.area-intro .lede { flex: 1 1 240px; }
+.area-intro :global(.minimap) { flex: none; }
+@media (max-width: 480px) {
+  .area-intro :global(.minimap) { max-width: 150px; }
+}
 
 .routes { display: grid; gap: 12px; }
 @media (min-width: 600px) { .routes { grid-template-columns: 1fr 1fr; } }

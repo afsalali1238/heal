@@ -1,0 +1,129 @@
+---
+/**
+ * Accessible hold timer. Every stretching item prescribes a hold in seconds
+ * (usually 30); patients otherwise count in their heads or rush it. This is a
+ * plain countdown — no sound (MEDIA-PLAN: no audio), a vibration on capable
+ * phones, and announcements only at start and finish so it never chatters.
+ */
+interface Props {
+  seconds: number;
+}
+const { seconds } = Astro.props;
+const mm = Math.floor(seconds / 60);
+const ss = String(seconds % 60).padStart(2, '0');
+---
+
+<div class="timer" data-timer={seconds}>
+  <p class="timer__face" aria-hidden="true" data-face>{mm}:{ss}</p>
+  <div class="timer__row">
+    <button type="button" class="timer__btn" data-start>Start {seconds}-second hold</button>
+    <button type="button" class="timer__btn timer__btn--ghost" data-reset hidden>Reset</button>
+  </div>
+  <p class="timer__status" role="status" data-status></p>
+</div>
+
+<style>
+  .timer {
+    border-top: 1px solid var(--line); padding-top: 11px;
+    display: grid; gap: 8px;
+  }
+  .timer__face {
+    margin: 0; font-family: var(--f-mono); font-weight: 600;
+    font-size: calc(22px * var(--scale)); font-variant-numeric: tabular-nums;
+    color: var(--ink); line-height: 1.1;
+  }
+  .timer__face.is-running { color: var(--brand); }
+  .timer__face.is-done { color: var(--strengthen); }
+  .timer__row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .timer__btn {
+    min-height: 44px; padding: 9px 16px; cursor: pointer; border-radius: 999px;
+    background: var(--surface-2); color: var(--ink); border: 1px solid var(--line);
+    font-family: var(--f-display); font-weight: 600;
+    font-size: calc(14px * var(--scale));
+  }
+  .timer__btn:hover { border-color: var(--brand); color: var(--brand); }
+  .timer__btn:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+  .timer__btn[hidden] { display: none; }
+  .timer__status { margin: 0; font-size: calc(13px * var(--scale)); color: var(--ink-3); }
+  .timer__status:empty { display: none; }
+  @media print { .timer { display: none; } }
+</style>
+
+<script>
+  // Emitted once per timed card: per-root wiring is idempotent via a marker,
+  // so repeated execution (however the bundler emits this) is harmless.
+  for (const root of document.querySelectorAll<HTMLElement>('[data-timer]')) {
+    if (root.dataset.timerWired) continue;
+    root.dataset.timerWired = '1';
+    const total = Number(root.dataset.timer) || 0;
+    const face = root.querySelector<HTMLElement>('[data-face]');
+    const startBtn = root.querySelector<HTMLButtonElement>('[data-start]');
+    const resetBtn = root.querySelector<HTMLButtonElement>('[data-reset]');
+    const status = root.querySelector<HTMLElement>('[data-status]');
+    if (!face || !startBtn || !resetBtn || !status || total <= 0) continue;
+
+    const fmt = (s: number): string => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    let remaining = total;
+    let tick: ReturnType<typeof setInterval> | null = null;
+    let last = 0;
+
+    const paint = (): void => {
+      face.textContent = fmt(remaining);
+    };
+
+    const finish = (): void => {
+      if (tick) clearInterval(tick);
+      tick = null;
+      remaining = 0;
+      paint();
+      face.classList.remove('is-running');
+      face.classList.add('is-done');
+      startBtn.hidden = true;
+      resetBtn.hidden = false;
+      status.textContent = 'Hold finished. Well done — breathe normally.';
+      try {
+        if (navigator.vibrate) navigator.vibrate(200);
+      } catch {
+        /* Vibration is a courtesy, never a requirement. */
+      }
+    };
+
+    startBtn.addEventListener('click', () => {
+      if (tick) {
+        // Pause: the hold clock stops while paused.
+        clearInterval(tick);
+        tick = null;
+        startBtn.textContent = 'Resume hold';
+        status.textContent = `Paused with ${fmt(remaining)} left.`;
+        return;
+      }
+      last = Date.now();
+      face.classList.add('is-running');
+      face.classList.remove('is-done');
+      resetBtn.hidden = false;
+      startBtn.textContent = 'Pause';
+      status.textContent = `Hold started. ${fmt(remaining)} left.`;
+      tick = setInterval(() => {
+        const now = Date.now();
+        remaining = Math.max(0, remaining - (now - last) / 1000);
+        last = now;
+        paint();
+        if (remaining <= 0) finish();
+      }, 250);
+    });
+
+    resetBtn.addEventListener('click', () => {
+      if (tick) clearInterval(tick);
+      tick = null;
+      remaining = total;
+      paint();
+      face.classList.remove('is-running', 'is-done');
+      startBtn.hidden = false;
+      startBtn.textContent = `Start ${total}-second hold`;
+      resetBtn.hidden = true;
+      status.textContent = '';
+    });
+
+    paint();
+  }
+</script>

@@ -1,0 +1,19 @@
+{
+  "name": "physio-fable",
+  "private": true,
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "fable": "fable Client.fsproj --outDir build",
+    "render": "node scripts/render.mjs",
+    "build": "npm run fable && npm run render",
+    "clean": "rm -rf build dist",
+    "qa": "node scripts/qa.mjs"
+  },
+  "dependencies": {
+    "@fable-org/fable-library-js": "^2.6.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}

@@ -6,7 +6,6 @@
 import Base from '../layouts/Base.astro';
 import BackLink from '../components/BackLink.astro';
 import AnatomyLocator from '../components/AnatomyLocator.astro';
-import FullBodyLocator from '../components/anatomy/FullBodyLocator.astro';
 ---
 
 <Base
@@ -14,6 +13,13 @@ import FullBodyLocator from '../components/anatomy/FullBodyLocator.astro';
   description="Choose the body area your physiotherapist pointed to, from a body map or a plain list."
 >
   <BackLink href="/" label="Home" />
+  {/*
+    Patient route carries the 2D chooser only. The 3D body guide
+    (FullBodyLocator) stays available on the clinician preview route, but it
+    is a prototype blockout — unapproved colours, neck/shoulders only, and a
+    second competing map on the same page — so it does not ship to patients.
+    Restore it here when a clinician-approved full-body asset lands (sheet +
+    asset-registry change, not a code change here).
+  */}
   <AnatomyLocator />
-  <FullBodyLocator />
 </Base>

@@ -1,0 +1,216 @@
+---
+/**
+ * Deterministic exercise illustration — still + optional motion, no media files.
+ *
+ * The still is server-rendered SVG from the item's figure spec (joint angles
+ * over the shared joint table, A-019). The motion player re-renders the same
+ * implementation per frame in the browser (`pose.ts` + `figure-svg.ts`
+ * imported into the client script), so still and motion cannot disagree.
+ *
+ * Honesty contract: the figure is a schematic of the item's WRITTEN steps, not
+ * a reviewed picture. It always carries the awaiting-check caption, and the
+ * written steps remain the authority. Motion needs explicit Play, pauses
+ * off-screen/hidden, and never autoplays.
+ */
+import { EXERCISE_FIGURES } from '../../data/anatomy/exercise-figures';
+import {
+  figureInnerSVG,
+  figureViewBox,
+} from '../../lib/anatomy/geometry/figure-svg';
+
+interface Props {
+  /** Item id — must have a spec in EXERCISE_FIGURES (the figure gate enforces this). */
+  itemId: string;
+  /** Accessible name for the still (the item's position alt text). */
+  label: string;
+}
+
+const { itemId, label } = Astro.props;
+const spec = EXERCISE_FIGURES[itemId];
+if (!spec) throw new Error(`ExerciseFigure: no figure spec for "${itemId}".`);
+const canAnimate = JSON.stringify(spec.start) !== JSON.stringify(spec.end);
+const still = figureInnerSVG(spec, spec.start, { showArrow: true });
+---
+
+<div class="efig" data-efig={itemId}>
+  <svg
+    class="efig__art"
+    viewBox={figureViewBox(spec)}
+    role="img"
+    aria-label={label}
+    data-art
+    set:html={still}
+  />
+  {canAnimate && (
+    <div class="efig__controls" data-controls>
+      <button type="button" class="efig__btn" data-play>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l13-7.5Z"/></svg>
+        <span data-play-label>Show movement</span>
+      </button>
+      <button type="button" class="efig__btn" data-replay hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        <span>Replay</span>
+      </button>
+    </div>
+  )}
+  <p class="efig__status" data-status role="status"></p>
+  <p class="efig__cap">Illustration of the written steps · awaiting physiotherapist picture check</p>
+</div>
+
+<style>
+  .efig { display: grid; gap: 8px; }
+  .efig__art {
+    width: 100%; height: auto; aspect-ratio: 4 / 3; display: block;
+    object-fit: contain; background-color: var(--surface);
+    border-radius: var(--r-inner);
+  }
+  .efig__controls { display: flex; flex-wrap: wrap; gap: 8px; }
+  .efig__btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    min-height: 44px; padding: 9px 16px; cursor: pointer;
+    background: var(--surface-2); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 999px;
+    font-family: var(--f-display); font-weight: 600;
+    font-size: calc(14px * var(--scale));
+  }
+  .efig__btn:hover { border-color: var(--brand); color: var(--brand); }
+  .efig__btn:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+  .efig__btn svg { width: 16px; height: 16px; flex: none; }
+  .efig__btn[hidden] { display: none; }
+  .efig__status { margin: 0; font-size: calc(13px * var(--scale)); color: var(--ink-3); min-height: 1em; }
+  .efig__status:empty { display: none; }
+  .efig__cap {
+    margin: 0; font-size: calc(12px * var(--scale)); color: var(--ink-3);
+    line-height: 1.45;
+  }
+  @media print {
+    .efig__controls, .efig__status { display: none; }
+  }
+</style>
+
+<script>
+  import { buildFigure, tweenPose } from '../../lib/anatomy/geometry/pose';
+  import { figureInnerSVG } from '../../lib/anatomy/geometry/figure-svg';
+  import { EXERCISE_FIGURES } from '../../data/anatomy/exercise-figures';
+
+  // This component renders once per exercise card, so the script block is
+  // emitted many times per page. Initialise exactly once; the loop below
+  // picks up every card on the page.
+  if ((window as unknown as { __efigInit?: boolean }).__efigInit) {
+    // Already initialised — Astro re-emitted this block for another card.
+  } else {
+    (window as unknown as { __efigInit?: boolean }).__efigInit = true;
+    initFigures();
+  }
+
+  function initFigures(): void {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Out 1.4s → hold 0.6s → back 1.2s → rest 0.5s. Slow enough to follow.
+  const OUT_MS = 1400;
+  const HOLD_MS = 600;
+  const BACK_MS = 1200;
+  const REST_MS = 500;
+  const CYCLE = OUT_MS + HOLD_MS + BACK_MS + REST_MS;
+
+  const easeInOut = (t: number): number =>
+    t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+  /** Pose at loop-time `t` (ms): out, hold, back, rest. */
+  function poseAt(spec: (typeof EXERCISE_FIGURES)[string], t: number) {
+    if (t < OUT_MS) return tweenPose(spec.start, spec.end, easeInOut(t / OUT_MS));
+    if (t < OUT_MS + HOLD_MS) return spec.end;
+    const bt = t - OUT_MS - HOLD_MS;
+    if (bt < BACK_MS) return tweenPose(spec.end, spec.start, easeInOut(bt / BACK_MS));
+    return spec.start;
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-efig]')) {
+    const id = root.dataset.efig!;
+    const spec = (EXERCISE_FIGURES as Record<string, (typeof EXERCISE_FIGURES)[string]>)[id];
+    const art = root.querySelector<SVGElement>('[data-art]');
+    const play = root.querySelector<HTMLButtonElement>('[data-play]');
+    const playLabel = root.querySelector<HTMLElement>('[data-play-label]');
+    const replay = root.querySelector<HTMLButtonElement>('[data-replay]');
+    const status = root.querySelector<HTMLElement>('[data-status]');
+    if (!spec || !art || !play || !playLabel || !replay || !status) continue;
+
+    const still = () => {
+      art.innerHTML = figureInnerSVG(spec, spec.start, { showArrow: true });
+    };
+
+    let raf = 0;
+    let origin = 0;
+    let playing = false;
+
+    const say = (msg: string) => {
+      status.textContent = msg;
+    };
+
+    const paint = (now: number) => {
+      if (!playing) return;
+      const t = (now - origin) % CYCLE;
+      art.innerHTML = figureInnerSVG(spec, poseAt(spec, t), { showArrow: false });
+      if (reduced && now - origin >= OUT_MS + HOLD_MS + BACK_MS) {
+        // Reduced motion: one explicit out-and-back, then stop on the still.
+        stop('Movement finished.');
+        still();
+        return;
+      }
+      raf = requestAnimationFrame(paint);
+    };
+
+    const start = () => {
+      playing = true;
+      origin = performance.now();
+      playLabel.textContent = 'Pause';
+      play.setAttribute('aria-pressed', 'true');
+      replay.hidden = true;
+      say('Movement playing. The written steps below remain the instruction.');
+      raf = requestAnimationFrame(paint);
+    };
+
+    const stop = (msg: string) => {
+      playing = false;
+      cancelAnimationFrame(raf);
+      playLabel.textContent = 'Show movement';
+      play.removeAttribute('aria-pressed');
+      replay.hidden = false;
+      if (msg) say(msg);
+    };
+
+    play.addEventListener('click', () => {
+      if (playing) {
+        stop('Movement paused.');
+        still();
+      } else {
+        still();
+        start();
+      }
+    });
+
+    replay.addEventListener('click', () => {
+      still();
+      start();
+    });
+
+    // Never play to an empty room: pause when hidden or scrolled away.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && playing) {
+        stop('Movement paused because the page is hidden.');
+        still();
+      }
+    });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(
+        (entries) => {
+          if (!entries[0]?.isIntersecting && playing) {
+            stop('Movement paused because it left the screen.');
+            still();
+          }
+        },
+        { threshold: 0.15 },
+      ).observe(root);
+    }
+    }
+  }
+</script>

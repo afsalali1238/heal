@@ -48,7 +48,7 @@ export const ASSET_REGISTRY: readonly AnatomyAssetMetadata[] = [
     license: 'Internal Web Distribution License',
     author_or_attribution: 'Anatomy Explorer 3D Geometry Project',
     compressed: true,
-    compressed_bytes: 83648,
+    compressed_bytes: 66180,
     triangle_count: 2936,
     status: 'approved',
     reviewed_by: 'Supervisor',

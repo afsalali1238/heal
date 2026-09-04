@@ -1,0 +1,49 @@
+---
+/**
+ * Area-chapter locator thumbnail: the shared silhouette with this area's
+ * published regions highlighted (front view). Server-rendered, zero client JS.
+ *
+ * Area pages previously had no visual at all — a patient arriving from the
+ * locator's rich map landed on a wall of text. This reuses the same geometry
+ * (`body-regions.ts` ← joint table) so it cannot disagree with the locator.
+ */
+import { getBodyRegions } from '../../data/anatomy/body-regions';
+import { SILHOUETTE, DETAIL, VIEWBOX } from '../../lib/anatomy/geometry/skeleton';
+
+interface Props {
+  areaId: string;
+  areaName: string;
+}
+const { areaId, areaName } = Astro.props;
+
+const regions = await getBodyRegions();
+const shapes = regions
+  .filter((r) => r.areaId === areaId && r.views.includes('front'))
+  .flatMap((r) => r.shapes);
+---
+
+<svg
+  class="minimap"
+  viewBox={VIEWBOX}
+  role="img"
+  aria-label={`Body map with the ${areaName} area highlighted`}
+>
+  <g fill="var(--line)" stroke="none">
+    {SILHOUETTE.filled.map((d) => <path d={d} />)}
+  </g>
+  <g fill="none" stroke="var(--line)" stroke-linecap="round">
+    {SILHOUETTE.strokes.map((s) => <path d={s.d} stroke-width={s.w} />)}
+  </g>
+  <g fill="none" stroke="var(--ink-3)" stroke-width="1.5" stroke-linecap="round" opacity="0.55">
+    {DETAIL.front.map((d) => <path d={d} />)}
+  </g>
+  <g fill="none" stroke="var(--brand)" stroke-linecap="round" opacity="0.85">
+    {shapes.map((s) => <path d={s.d} stroke-width={s.w} />)}
+  </g>
+</svg>
+
+<style>
+  .minimap {
+    width: 100%; max-width: 190px; height: auto; display: block;
+  }
+</style>

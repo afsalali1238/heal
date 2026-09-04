@@ -61,8 +61,10 @@ These are unchanged by the merge. They apply to every file and every tool.
    commit messages.
 
 6. **No analytics, accounts, tracking or backend.** Decision D-007. This is why the Vercel
-   `webAnalytics` flag is not coming back (`astro.config.mjs` correctly has it off). Two
-   `localStorage` keys are permitted (last chosen area, text size) and nothing else.
+   `webAnalytics` flag is not coming back (`astro.config.mjs` correctly has it off). Three
+   `localStorage` keys are permitted (last chosen area, text size, device-local
+   completion marks) and nothing else. The completion list never leaves the
+   device — there is no backend to send it to.
 
 7. **17px base font. Areas sort head to toe, never alphabetically.** Decision D-014.
 

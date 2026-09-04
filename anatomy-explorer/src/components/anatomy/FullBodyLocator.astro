@@ -32,8 +32,12 @@ const asset = previewMode
   aria-labelledby="anatomy-title"
 >
   <div class="slice-head">
-    <div><p class="eyebrow">3D body guide</p><h2 id="anatomy-title">Choose a body area</h2></div>
-    <span class="review-note">Anatomical accuracy awaiting clinician approval</span>
+    <div>
+      <p class="eyebrow">3D body guide</p>
+      <h2 id="anatomy-title">Explore the same areas in 3D</h2>
+      <p class="slice-sub">Spin the body and choose a highlighted region — it goes to the same place as the list above.</p>
+    </div>
+    <span class="review-note">Anatomy awaiting clinician review</span>
   </div>
   <div class="stage-wrap">
     <div class="stage" data-stage>
@@ -116,24 +120,55 @@ const asset = previewMode
         renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
         const group = new THREE.Group();
         scene.add(group);
-        scene.add(new THREE.HemisphereLight('#fffaf2', '#786b60', 2));
+        scene.add(new THREE.HemisphereLight('#ffffff', '#cfc6b8', 1.15));
+        const key = new THREE.DirectionalLight('#ffffff', 1.5);
+        key.position.set(2.5, 4, 3.5);
+        scene.add(key);
         const loader = new GLTFLoader();
         const gltf = await loader.loadAsync(qa === 'asset-failure' ? '/anatomy/models/missing.glb' : assetUrl);
         if (cancelled) return;
         group.add(gltf.scene);
 
-        // Fit the complete model into the stage. The blockout's dimensions can
-        // change between prototype exports, so fixed camera coordinates caused
-        // heads or legs to be cropped on narrow screens.
-        const bounds = new THREE.Box3().setFromObject(gltf.scene);
-        const center = bounds.getCenter(new THREE.Vector3());
-        const size = bounds.getSize(new THREE.Vector3());
-        const maxSize = Math.max(size.x, size.y, size.z);
-        const fitDistance = (maxSize / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.18;
-        group.position.sub(center);
-        camera.position.set(0, 0, fitDistance);
-        cameraTarget.set(0, 0, 0);
-        camera.lookAt(cameraTarget);
+        // The prototype export's own colours (muddy brown body, red region
+        // meshes) read as injury, not interface. Normalise every mesh to a
+        // calm matte neutral; selectable region meshes get a soft tint so
+        // they read as interactive before anything is chosen.
+        const BASE_BODY = 0xd8d1c6;
+        const BASE_REGION = 0xa9c9de;
+        const SELECTED = 0x1f8ac9;
+        const SELECTED_GLOW = 0x0a2a3a;
+        const regionMeshNames = new Set<string>();
+        for (const visual of BODY_REGION_VISUALS) for (const name of visual.meshNames) regionMeshNames.add(name);
+        gltf.scene.traverse((node: any) => {
+          if (!node?.isMesh) return;
+          node.material = node.material?.clone?.() ?? node.material;
+          const mats = Array.isArray(node.material) ? node.material : [node.material];
+          for (const mat of mats) {
+            if (!mat?.color) continue;
+            mat.color.setHex(regionMeshNames.has(node.name) ? BASE_REGION : BASE_BODY);
+            if ('roughness' in mat) mat.roughness = 0.85;
+            if ('metalness' in mat) mat.metalness = 0;
+            if (mat.emissive) mat.emissive.setHex(0x000000);
+          }
+        });
+
+        // Fit the complete model into the stage for the *actual* canvas
+        // aspect. The old fit used the vertical field of view only, so on a
+        // narrow phone viewport (tall canvas, tiny horizontal fov) the head
+        // and shoulders cropped out of frame.
+        const fitCamera = () => {
+          const bounds = new THREE.Box3().setFromObject(gltf.scene);
+          const center = bounds.getCenter(new THREE.Vector3());
+          const size = bounds.getSize(new THREE.Vector3());
+          const vFit = (size.y / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+          const hFov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect);
+          const hFit = (Math.max(size.x, size.z) / 2) / Math.tan(hFov / 2);
+          group.position.set(-center.x, -center.y, -center.z);
+          cameraTarget.set(0, 0, 0);
+          camera.position.set(0, 0, Math.max(vFit, hFit) * 1.25);
+          camera.lookAt(cameraTarget);
+        };
+        fitCamera();
 
         let frame = 0;
         let disposed = false;
@@ -166,12 +201,14 @@ const asset = previewMode
           }
         }
         const render = () => { if (!disposed) renderer.render(scene, camera); };
+        let fitted = false;
         const resize = () => {
           const rect = canvas.getBoundingClientRect();
           if (rect.width <= 0 || rect.height <= 0) return false;
           renderer.setSize(rect.width, rect.height, false);
           camera.aspect = rect.width / rect.height;
           camera.updateProjectionMatrix();
+          if (!fitted) { fitted = true; fitCamera(); }
           render();
           return true;
         };
@@ -236,8 +273,8 @@ const asset = previewMode
           if (!region || !visual) return;
           for (const [meshName, object] of selectable) {
             const active = visual.meshNames.includes(meshName);
-            object.material.color.setHex(active ? 0xb84f35 : (originalColors.get(object) ?? 0xe07a5f));
-            object.material.emissive?.setHex(active ? 0x351007 : 0x000000);
+            object.material.color.setHex(active ? SELECTED : (originalColors.get(object) ?? BASE_REGION));
+            object.material.emissive?.setHex(active ? SELECTED_GLOW : 0x000000);
           }
           activeRegionName = region.name;
           selected.textContent = `${region.name} selected`;
@@ -363,6 +400,6 @@ const asset = previewMode
 </script>
 
 <style>
-.anatomy-slice{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:20px;margin:24px 0}.slice-head{display:flex;justify-content:space-between;gap:16px;align-items:start}.eyebrow{margin:0;color:var(--ink-3);font:600 11px var(--f-display);letter-spacing:.14em;text-transform:uppercase}.slice-head h2{margin:5px 0 0;font:700 25px var(--f-display)}.review-note{font-size:12px;color:var(--ink-3);max-width:25ch;text-align:right}.stage-wrap{display:grid;grid-template-columns:minmax(220px,1fr) 170px;gap:16px;margin-top:18px}.stage{min-height:340px;position:relative;border-radius:12px;background:#f4f1eb;overflow:hidden}.stage canvas{width:100%;height:340px;display:block;touch-action:none}.loading,.error{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:var(--ink-2)}.controls{display:grid;align-content:start;gap:12px}.orientation{display:flex;flex-wrap:wrap;gap:4px}.orientation button,.fallback-button,.continue-link{min-height:44px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 10px;cursor:pointer}.orientation button[aria-pressed=true]{background:var(--brand);color:var(--brand-ink)}.selected{font-size:14px}.continue-link{display:grid;place-items:center;text-align:center;text-decoration:none;background:var(--brand);color:var(--brand-ink);font-weight:700}.continue-link[hidden]{display:none}.fallback-button{font-weight:600}.semantic-fallback{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.semantic-fallback[hidden]{display:none}.semantic-fallback a[aria-current=true],.semantic-fallback button[aria-current=true]{font-weight:700;text-decoration:underline;text-decoration-thickness:3px}.semantic-fallback button{font:inherit;color:inherit;background:transparent;border:0;padding:4px 0;cursor:pointer}.semantic-fallback button span{font-size:.78em;color:var(--ink-3)}@media(max-width:600px){.stage-wrap{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.selected{grid-column:1/-1}.slice-head{display:block}.review-note{text-align:left;margin-top:8px}}
+.anatomy-slice{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:20px;margin:24px 0}.slice-head{display:flex;justify-content:space-between;gap:16px;align-items:start}.eyebrow{margin:0;color:var(--ink-3);font:600 11px var(--f-display);letter-spacing:.14em;text-transform:uppercase}.slice-head h2{margin:5px 0 0;font:700 25px var(--f-display)}.slice-sub{margin:8px 0 0;color:var(--ink-2);font-size:calc(15px * var(--scale));line-height:1.5;max-width:52ch}.review-note{flex:none;align-self:start;font-family:var(--f-display);font-weight:600;font-size:calc(11.5px * var(--scale));letter-spacing:.06em;text-transform:uppercase;color:var(--warn);background:var(--warn-bg);border:1px solid currentColor;border-radius:999px;padding:5px 12px;white-space:nowrap}.stage-wrap{display:grid;grid-template-columns:minmax(220px,1fr) 170px;gap:16px;margin-top:18px}.stage{min-height:340px;position:relative;border-radius:12px;background:#f4f1eb;overflow:hidden}.stage canvas{width:100%;height:340px;display:block;touch-action:none}.loading,.error{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:var(--ink-2)}.controls{display:grid;align-content:start;gap:12px}.orientation{display:flex;flex-wrap:wrap;gap:4px}.orientation button,.fallback-button,.continue-link{min-height:44px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 10px;cursor:pointer}.orientation button[aria-pressed=true]{background:var(--brand);color:var(--brand-ink)}.selected{font-size:14px}.continue-link{display:grid;place-items:center;text-align:center;text-decoration:none;background:var(--brand);color:var(--brand-ink);font-weight:700}.continue-link[hidden]{display:none}.fallback-button{font-weight:600}.semantic-fallback{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.semantic-fallback[hidden]{display:none}.semantic-fallback a[aria-current=true],.semantic-fallback button[aria-current=true]{font-weight:700;text-decoration:underline;text-decoration-thickness:3px}.semantic-fallback button{font:inherit;color:inherit;background:transparent;border:0;padding:4px 0;cursor:pointer}.semantic-fallback button span{font-size:.78em;color:var(--ink-3)}@media(max-width:600px){.stage-wrap{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.selected{grid-column:1/-1}.slice-head{display:block}.review-note{text-align:left;margin-top:8px}}
 .loading[hidden],.error[hidden],canvas[hidden]{display:none}
 </style>
