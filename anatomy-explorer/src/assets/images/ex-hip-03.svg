@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 560" width="420" height="560" role="img" aria-labelledby="fig-title-ex-hip-03">
+  <title id="fig-title-ex-hip-03">Bridging — movement figure</title>
+  <desc>Schematic movement figure. Squeeze your buttocks and lift your hips off the floor until your body forms a straight line.  The range is whatever the words describe, not what this drawing shows.</desc>
+  <style>
+    .mv { will-change: transform; }
+    @keyframes mv-torso {
+      0% { transform: rotate(0deg); }
+      13.3% { transform: rotate(16deg); }
+      17.9% { transform: rotate(16deg); }
+      35.7% { transform: rotate(16deg); }
+      53.6% { transform: rotate(16deg); }
+      66.9% { transform: rotate(0deg); }
+      69.1% { transform: rotate(0deg); }
+      84.5% { transform: rotate(0deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes mv-legL {
+      0% { transform: rotate(0deg); }
+      17.9% { transform: rotate(0deg); }
+      31.2% { transform: rotate(20deg); }
+      35.7% { transform: rotate(20deg); }
+      53.6% { transform: rotate(20deg); }
+      69.1% { transform: rotate(20deg); }
+      82.4% { transform: rotate(0deg); }
+      84.5% { transform: rotate(0deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes mv-legR {
+      0% { transform: rotate(0deg); }
+      17.9% { transform: rotate(0deg); }
+      31.2% { transform: rotate(20deg); }
+      35.7% { transform: rotate(20deg); }
+      53.6% { transform: rotate(20deg); }
+      69.1% { transform: rotate(20deg); }
+      82.4% { transform: rotate(0deg); }
+      84.5% { transform: rotate(0deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes mv-shinL {
+      0% { transform: rotate(0deg); }
+      17.9% { transform: rotate(0deg); }
+      35.7% { transform: rotate(0deg); }
+      49.1% { transform: rotate(-16deg); }
+      53.6% { transform: rotate(-16deg); }
+      69.1% { transform: rotate(-16deg); }
+      84.5% { transform: rotate(-16deg); }
+      97.9% { transform: rotate(0deg); }
+      100% { transform: rotate(0deg); }
+    }
+    @keyframes mv-shinR {
+      0% { transform: rotate(0deg); }
+      17.9% { transform: rotate(0deg); }
+      35.7% { transform: rotate(0deg); }
+      49.1% { transform: rotate(-16deg); }
+      53.6% { transform: rotate(-16deg); }
+      69.1% { transform: rotate(-16deg); }
+      84.5% { transform: rotate(-16deg); }
+      97.9% { transform: rotate(0deg); }
+      100% { transform: rotate(0deg); }
+    }
+    /* Reduced motion and print both fall back to the two states, which say the same
+       thing without moving: the faded body is where it starts, the solid outline and
+       the arc are where it ends. */
+    @media (prefers-reduced-motion: reduce), print {
+      .live { display: none; }
+      .end { opacity: 1 !important; }
+    }
+  </style>
+  <rect width="420" height="560" fill="#FFFFFF" />
+  <g transform="translate(94.8 -197.8) scale(1)">
+    <path d="M-88 491.7 L316.3 491.7" stroke="#E2E5EB" stroke-width="9" stroke-linecap="round" fill="none" />
+    <g class="ghost">
+      <path d="M150 452 L-24 452" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="26" stroke-linecap="round" fill="none" />
+      <circle cx="-54" cy="452" r="24.6" fill="#C9CFDA" opacity="0.95" />
+      <path d="M-29 452 L65.5 458.6" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="13" stroke-linecap="round" fill="none" />
+      <path d="M60.5 458.6 L146.5 464.6" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M141.5 464.6 L185.5 467.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="10" stroke-linecap="round" fill="none" />
+      <path d="M-19 452 L75.5 458.6" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="13" stroke-linecap="round" fill="none" />
+      <path d="M80.5 458.6 L166.5 464.6" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M171.5 464.6 L215.5 467.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="10" stroke-linecap="round" fill="none" />
+      <path d="M145 452 L261.1 373.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="17" stroke-linecap="round" fill="none" />
+      <path d="M256.1 373.7 L256.1 483.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="14" stroke-linecap="round" fill="none" />
+      <path d="M251.1 483.7 L252.3 447.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M155 452 L271.1 373.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="17" stroke-linecap="round" fill="none" />
+      <path d="M276.1 373.7 L276.1 483.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="14" stroke-linecap="round" fill="none" />
+      <path d="M281.1 483.7 L282.3 447.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="11" stroke-linecap="round" fill="none" />
+    </g>
+    <g class="end" opacity="0.62">
+      <path d="M150 452 L-24 452" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="26" stroke-linecap="round" fill="none" />
+      <circle cx="-54" cy="452" r="24.6" fill="#1D4ED8" opacity="0.72" />
+      <path d="M-29 452 L65.5 458.6" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="13" stroke-linecap="round" fill="none" />
+      <path d="M60.5 458.6 L146.5 464.6" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M141.5 464.6 L185.5 467.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="10" stroke-linecap="round" fill="none" />
+      <path d="M-19 452 L75.5 458.6" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="13" stroke-linecap="round" fill="none" />
+      <path d="M80.5 458.6 L166.5 464.6" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M171.5 464.6 L215.5 467.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="10" stroke-linecap="round" fill="none" />
+      <path d="M145 452 L261.1 373.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="17" stroke-linecap="round" fill="none" />
+      <path d="M256.1 373.7 L256.1 483.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="14" stroke-linecap="round" fill="none" />
+      <path d="M251.1 483.7 L252.3 447.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M155 452 L271.1 373.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="17" stroke-linecap="round" fill="none" />
+      <path d="M276.1 373.7 L276.1 483.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="14" stroke-linecap="round" fill="none" />
+      <path d="M281.1 483.7 L282.3 447.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round" fill="none" />
+    </g>
+    <g class="focus">
+      <circle cx="150" cy="452" r="21" fill="rgba(240, 190, 110, 0.45)" />
+      <circle cx="145" cy="452" r="21" fill="rgba(240, 190, 110, 0.45)" />
+      <circle cx="155" cy="452" r="21" fill="rgba(240, 190, 110, 0.45)" />
+      
+      
+    </g>
+    <path d="M-24 452 L-24 452" stroke="#1D4ED8" stroke-width="3" stroke-dasharray="7 6" fill="none" opacity="0.85" />
+    <path d="M-24 452 L-31.7 456.6 M-24 452 L-31.7 447.4" stroke="#1D4ED8" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.85" />
+    <g class="live">
+      <g class="mv" style="transform-origin:150px 452px;transform-box:view-box;animation:mv-torso 4.4s linear infinite"><path d="M150 452 L-24 452" stroke="#5A6473" stroke-width="26" stroke-linecap="round" fill="none" /><g><circle cx="-54" cy="452" r="24.6" fill="#5A6473" /></g><g><path d="M-29 452 L65.5 458.6" stroke="#5A6473" stroke-width="13" stroke-linecap="round" fill="none" /><g><path d="M60.5 458.6 L146.5 464.6" stroke="#5A6473" stroke-width="11" stroke-linecap="round" fill="none" /><g><path d="M141.5 464.6 L185.5 467.7" stroke="#5A6473" stroke-width="10" stroke-linecap="round" fill="none" /></g></g></g><g><path d="M-19 452 L75.5 458.6" stroke="#5A6473" stroke-width="13" stroke-linecap="round" fill="none" /><g><path d="M80.5 458.6 L166.5 464.6" stroke="#5A6473" stroke-width="11" stroke-linecap="round" fill="none" /><g><path d="M171.5 464.6 L215.5 467.7" stroke="#5A6473" stroke-width="10" stroke-linecap="round" fill="none" /></g></g></g><g class="mv" style="transform-origin:145px 452px;transform-box:view-box;animation:mv-legL 4.4s linear infinite"><path d="M145 452 L261.1 373.7" stroke="#5A6473" stroke-width="17" stroke-linecap="round" fill="none" /><g class="mv" style="transform-origin:256.1px 373.7px;transform-box:view-box;animation:mv-shinL 4.4s linear infinite"><path d="M256.1 373.7 L256.1 483.7" stroke="#5A6473" stroke-width="14" stroke-linecap="round" fill="none" /><g><path d="M251.1 483.7 L252.3 447.7" stroke="#5A6473" stroke-width="11" stroke-linecap="round" fill="none" /></g></g></g><g class="mv" style="transform-origin:155px 452px;transform-box:view-box;animation:mv-legR 4.4s linear infinite"><path d="M155 452 L271.1 373.7" stroke="#5A6473" stroke-width="17" stroke-linecap="round" fill="none" /><g class="mv" style="transform-origin:276.1px 373.7px;transform-box:view-box;animation:mv-shinR 4.4s linear infinite"><path d="M276.1 373.7 L276.1 483.7" stroke="#5A6473" stroke-width="14" stroke-linecap="round" fill="none" /><g><path d="M281.1 483.7 L282.3 447.7" stroke="#5A6473" stroke-width="11" stroke-linecap="round" fill="none" /></g></g></g></g>
+    </g>
+  </g>
+  <g font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+    <text x="22" y="30" font-size="19" font-weight="600" fill="#111827">Bridging</text>
+    <text x="22" y="50" font-size="13" fill="#6B7280">Schematic drawn from the words below — not a photograph</text>
+    <text x="22" y="491" font-size="14" fill="#4B5563">Squeeze your buttocks and lift your hips off the</text>
+    <text x="22" y="506" font-size="14" fill="#4B5563">floor until your body forms a straight line.</text>
+    <text x="22" y="521" font-size="12" fill="#6B7280">Range: as far as the words say. The picture shows which</text>
+    <text x="22" y="536" font-size="12" fill="#6B7280">joint moves, not how far.</text>
+  </g>
+</svg>

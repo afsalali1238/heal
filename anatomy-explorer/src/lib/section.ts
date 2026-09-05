@@ -36,6 +36,12 @@ interface SectionCopy {
   readonly shortLabel: string;
   /** Noun for a single item in this section. */
   readonly itemNoun: string;
+  /**
+   * More than one. Held here rather than derived, because "stretch" + "s" is
+   * "stretchs" — the three count labels across the app each did that
+   * independently until this field existed.
+   */
+  readonly itemNounPlural: string;
 }
 
 export const SECTION_COPY: Readonly<Record<Section, SectionCopy>> = {
@@ -44,12 +50,14 @@ export const SECTION_COPY: Readonly<Record<Section, SectionCopy>> = {
     lede: 'Choose the part of your body you want to stretch.',
     shortLabel: 'Stretching',
     itemNoun: 'stretch',
+    itemNounPlural: 'stretches',
   },
   exercise: {
     title: 'Exercise Protocols',
     lede: 'Choose the part of your body you want to work on.',
     shortLabel: 'Exercises',
     itemNoun: 'exercise',
+    itemNounPlural: 'exercises',
   },
 };
 
@@ -61,4 +69,10 @@ export function sectionPath(section: Section): string {
 /** `/stretching/neck/` · `/exercise/shoulder/` */
 export function areaPath(section: Section, areaId: string): string {
   return `/${section}/${areaId}/`;
+}
+
+/** "3 stretches" / "1 stretch" — one pluralisation for every count label. */
+export function itemCountLabel(section: Section, count: number): string {
+  const copy = SECTION_COPY[section];
+  return `${count} ${count === 1 ? copy.itemNoun : copy.itemNounPlural}`;
 }

@@ -19,12 +19,12 @@ verified, or human-approved.
 
 ## 2. Findings Matrix (P0–P3)
 
-| ID | Severity | File & Location | Observed Behavior | Expected Standard | Status |
-|---|---|---|---|---|---|
-| **F-01** | `P1` (Human Gate) | `src/data/items.json` | 5 published items (`ex-neck-01`, `ex-neck-02`, `ex-shoulder-01`, `str-neck-02`, `str-neck-03`) have unpopulated `reviewed_by` and `reviewed_date`. | Clinical sign-off is mandatory before patient launch. | **Flagged for Human Review Gate** (Cannot be invented by AI). |
-| **F-02** | `P2` (Operational) | `scripts/check-compliance.ts` | Compliance checker runs in standard mode unless `COMPLIANCE_STRICT=1` is set in production environment. | Strict mode promotes unfilled license warnings to build errors in CI/CD. | **Resolved** via environment configuration flag. |
-| **F-03** | `P2` (Assets) | `src/assets/images/` | Several draft items do not yet have corresponding approved illustration assets. | `check-images.ts` verifies published assets; unapproved images remain blocked by `ExerciseImage.astro`. | **Resolved** by image approval gate. |
-| **F-04** | `P3` (Polish) | `src/components/TopBar.astro` | Search dialog button label is hidden on narrow screens (<400px) to prevent layout overflow. | Retains icon button with minimum 44px touch target and accessible `aria-label`. | **Resolved**. |
+| ID       | Severity           | File & Location               | Observed Behavior                                                                                                                                  | Expected Standard                                                                                       | Status                                                        |
+| -------- | ------------------ | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **F-01** | `P1` (Human Gate)  | `src/data/items.json`         | 5 published items (`ex-neck-01`, `ex-neck-02`, `ex-shoulder-01`, `str-neck-02`, `str-neck-03`) have unpopulated `reviewed_by` and `reviewed_date`. | Clinical sign-off is mandatory before patient launch.                                                   | **Flagged for Human Review Gate** (Cannot be invented by AI). |
+| **F-02** | `P2` (Operational) | `scripts/check-compliance.ts` | Compliance checker runs in standard mode unless `COMPLIANCE_STRICT=1` is set in production environment.                                            | Strict mode promotes unfilled license warnings to build errors in CI/CD.                                | **Resolved** via environment configuration flag.              |
+| **F-03** | `P2` (Assets)      | `src/assets/images/`          | Several draft items do not yet have corresponding approved illustration assets.                                                                    | `check-images.ts` verifies published assets; unapproved images remain blocked by `ExerciseImage.astro`. | **Resolved** by image approval gate.                          |
+| **F-04** | `P3` (Polish)      | `src/components/TopBar.astro` | Search dialog button label is hidden on narrow screens (<400px) to prevent layout overflow.                                                        | Retains icon button with minimum 44px touch target and accessible `aria-label`.                         | **Resolved**.                                                 |
 
 ---
 

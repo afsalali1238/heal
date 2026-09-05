@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 560" width="420" height="560" role="img" aria-labelledby="fig-title-str-neck-01">
+  <title id="fig-title-str-neck-01">Side Neck Stretch — movement figure</title>
+  <desc>Schematic movement figure. Let your right ear drop slowly towards your right shoulder.  The range is whatever the words describe, not what this drawing shows.</desc>
+  <style>
+    .mv { will-change: transform; }
+    @keyframes mv-head {
+      0% { transform: rotate(0deg); }
+      37.6% { transform: rotate(20deg); }
+      56.4% { transform: rotate(20deg); }
+      94% { transform: rotate(0deg); }
+      100% { transform: rotate(0deg); }
+    }
+    /* Reduced motion and print both fall back to the two states, which say the same
+       thing without moving: the faded body is where it starts, the solid outline and
+       the arc are where it ends. */
+    @media (prefers-reduced-motion: reduce), print {
+      .live { display: none; }
+      .end { opacity: 1 !important; }
+    }
+  </style>
+  <rect width="420" height="560" fill="#FFFFFF" />
+  <g transform="translate(46.6 84.1) scale(0.9)">
+    <path d="M53.5 341.7 L318.5 341.7" stroke="#E2E5EB" stroke-width="9" stroke-linecap="round" fill="none" />
+    <path d="M80 222 L180 222" stroke="#E2E5EB" stroke-width="9" stroke-linecap="round" fill="none" />
+    <path d="M80 222 L80 138" stroke="#E2E5EB" stroke-width="9" stroke-linecap="round" fill="none" />
+    <path d="M86 341.7 L86 222" stroke="#E2E5EB" stroke-width="9" stroke-linecap="round" fill="none" />
+    <path d="M172 341.7 L172 222" stroke="#E2E5EB" stroke-width="9" stroke-linecap="round" fill="none" />
+    <g class="ghost">
+      <path d="M126 214 L126 40" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="26" stroke-linecap="round" fill="none" />
+      <circle cx="126" cy="10" r="24.6" fill="#C9CFDA" opacity="0.95" />
+      <path d="M121 40 L111.1 134.2" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="13" stroke-linecap="round" fill="none" />
+      <path d="M106.1 134.2 L97.1 220" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M92.1 220 L87.5 263.8" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="10" stroke-linecap="round" fill="none" />
+      <path d="M131 40 L121.1 134.2" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="13" stroke-linecap="round" fill="none" />
+      <path d="M126.1 134.2 L117.1 220" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M122.1 220 L117.5 263.8" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="10" stroke-linecap="round" fill="none" />
+      <path d="M121 214 L260.7 223.8" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="17" stroke-linecap="round" fill="none" />
+      <path d="M255.7 223.8 L259.5 333.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="14" stroke-linecap="round" fill="none" />
+      <path d="M254.5 333.7 L218.5 332.5" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M131 214 L270.7 223.8" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="17" stroke-linecap="round" fill="none" />
+      <path d="M275.7 223.8 L279.5 333.7" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="14" stroke-linecap="round" fill="none" />
+      <path d="M284.5 333.7 L248.5 332.5" stroke="#C9CFDA" stroke-opacity="0.95" stroke-width="11" stroke-linecap="round" fill="none" />
+    </g>
+    <g class="end" opacity="0.62">
+      <path d="M126 214 L126 40" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="26" stroke-linecap="round" fill="none" />
+      <circle cx="126" cy="10" r="24.6" fill="#1D4ED8" opacity="0.72" />
+      <path d="M121 40 L111.1 134.2" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="13" stroke-linecap="round" fill="none" />
+      <path d="M106.1 134.2 L97.1 220" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M92.1 220 L87.5 263.8" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="10" stroke-linecap="round" fill="none" />
+      <path d="M131 40 L121.1 134.2" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="13" stroke-linecap="round" fill="none" />
+      <path d="M126.1 134.2 L117.1 220" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M122.1 220 L117.5 263.8" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="10" stroke-linecap="round" fill="none" />
+      <path d="M121 214 L260.7 223.8" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="17" stroke-linecap="round" fill="none" />
+      <path d="M255.7 223.8 L259.5 333.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="14" stroke-linecap="round" fill="none" />
+      <path d="M254.5 333.7 L218.5 332.5" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round" fill="none" />
+      <path d="M131 214 L270.7 223.8" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="17" stroke-linecap="round" fill="none" />
+      <path d="M275.7 223.8 L279.5 333.7" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="14" stroke-linecap="round" fill="none" />
+      <path d="M284.5 333.7 L248.5 332.5" stroke="#1D4ED8" stroke-opacity="0.72" stroke-width="11" stroke-linecap="round" fill="none" />
+    </g>
+    <g class="focus">
+      <circle cx="126" cy="40" r="21" fill="rgba(240, 190, 110, 0.45)" />
+      <circle cx="126" cy="10" r="21" fill="rgba(240, 190, 110, 0.45)" />
+      <circle cx="131" cy="40" r="21" fill="rgba(240, 190, 110, 0.45)" />
+      
+      
+    </g>
+    <path d="M126 10 L126 10" stroke="#1D4ED8" stroke-width="3" stroke-dasharray="7 6" fill="none" opacity="0.85" />
+    <path d="M126 10 L118.3 14.6 M126 10 L118.3 5.4" stroke="#1D4ED8" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.85" />
+    <g class="live">
+      <g><path d="M126 214 L126 40" stroke="#ADB5C2" stroke-width="26" stroke-linecap="round" fill="none" /><g class="mv" style="transform-origin:126px 40px;transform-box:view-box;animation:mv-head 4.4s linear infinite"><circle cx="126" cy="10" r="24.6" fill="#5A6473" /></g><g><path d="M121 40 L111.1 134.2" stroke="#ADB5C2" stroke-width="13" stroke-linecap="round" fill="none" /><g><path d="M106.1 134.2 L97.1 220" stroke="#ADB5C2" stroke-width="11" stroke-linecap="round" fill="none" /><g><path d="M92.1 220 L87.5 263.8" stroke="#ADB5C2" stroke-width="10" stroke-linecap="round" fill="none" /></g></g></g><g><path d="M131 40 L121.1 134.2" stroke="#ADB5C2" stroke-width="13" stroke-linecap="round" fill="none" /><g><path d="M126.1 134.2 L117.1 220" stroke="#ADB5C2" stroke-width="11" stroke-linecap="round" fill="none" /><g><path d="M122.1 220 L117.5 263.8" stroke="#ADB5C2" stroke-width="10" stroke-linecap="round" fill="none" /></g></g></g><g><path d="M121 214 L260.7 223.8" stroke="#ADB5C2" stroke-width="17" stroke-linecap="round" fill="none" /><g><path d="M255.7 223.8 L259.5 333.7" stroke="#ADB5C2" stroke-width="14" stroke-linecap="round" fill="none" /><g><path d="M254.5 333.7 L218.5 332.5" stroke="#ADB5C2" stroke-width="11" stroke-linecap="round" fill="none" /></g></g></g><g><path d="M131 214 L270.7 223.8" stroke="#ADB5C2" stroke-width="17" stroke-linecap="round" fill="none" /><g><path d="M275.7 223.8 L279.5 333.7" stroke="#ADB5C2" stroke-width="14" stroke-linecap="round" fill="none" /><g><path d="M284.5 333.7 L248.5 332.5" stroke="#ADB5C2" stroke-width="11" stroke-linecap="round" fill="none" /></g></g></g></g>
+    </g>
+  </g>
+  <g font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+    <text x="22" y="30" font-size="19" font-weight="600" fill="#111827">Side Neck Stretch</text>
+    <text x="22" y="50" font-size="13" fill="#6B7280">Schematic drawn from the words below — not a photograph</text>
+    <text x="22" y="491" font-size="14" fill="#4B5563">Let your right ear drop slowly towards your</text>
+    <text x="22" y="506" font-size="14" fill="#4B5563">right shoulder.</text>
+    <text x="22" y="521" font-size="12" fill="#6B7280">Range: as far as the words say. The picture shows which</text>
+    <text x="22" y="536" font-size="12" fill="#6B7280">joint moves, not how far.</text>
+  </g>
+</svg>

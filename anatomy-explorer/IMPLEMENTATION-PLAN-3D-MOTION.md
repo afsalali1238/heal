@@ -155,7 +155,13 @@ type MotionAsset = {
   loop: boolean;
   cameraView: 'front' | 'side' | 'three-quarter';
   sourceUrl: string;
-  sourceMethod: 'manual-blender' | 'mesh2motion' | 'freemocap' | 'pose2sim' | 'licensed-video' | 'temporary-reference';
+  sourceMethod:
+    | 'manual-blender'
+    | 'mesh2motion'
+    | 'freemocap'
+    | 'pose2sim'
+    | 'licensed-video'
+    | 'temporary-reference';
   status: VisualAssetStatus;
   reviewedBy: string;
   reviewedDate: string;
@@ -497,13 +503,13 @@ An asset can be technically complete and still remain `draft`.
 
 Maintain a table like this in the internal asset ledger:
 
-| Asset | Temporary source | Used for | Status | Replace before release |
-|---|---|---|---|---|
-| Full-body locator | Current draft GLB | Region selection | prototype | Yes |
-| Neck motion | Blender/Mesh2Motion test | Player proof | prototype | Yes or clinician approve |
-| Shoulder motion | Temporary capture/animation | Pipeline test | prototype | Yes or clinician approve |
-| Lower-limb motion | Temporary capture/animation | Pipeline test | prototype | Yes or clinician approve |
-| Exercise poster | Rendered from prototype | First-frame fallback | prototype | Yes or clinician approve |
+| Asset             | Temporary source            | Used for             | Status    | Replace before release   |
+| ----------------- | --------------------------- | -------------------- | --------- | ------------------------ |
+| Full-body locator | Current draft GLB           | Region selection     | prototype | Yes                      |
+| Neck motion       | Blender/Mesh2Motion test    | Player proof         | prototype | Yes or clinician approve |
+| Shoulder motion   | Temporary capture/animation | Pipeline test        | prototype | Yes or clinician approve |
+| Lower-limb motion | Temporary capture/animation | Pipeline test        | prototype | Yes or clinician approve |
+| Exercise poster   | Rendered from prototype     | First-frame fallback | prototype | Yes or clinician approve |
 
 ## 13. Immediate execution order
 

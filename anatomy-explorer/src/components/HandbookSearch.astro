@@ -6,17 +6,18 @@
 import { getCollection } from 'astro:content';
 import { areaPath } from '../lib/section';
 
-const [areas, items] = await Promise.all([
-  getCollection('areas'),
-  getCollection('items'),
-]);
+const [areas, items] = await Promise.all([getCollection('areas'), getCollection('items')]);
 
 const publishedItems = items.filter((i) => i.data.status === 'published');
-const publishedItemAreaKeys = new Set(publishedItems.map((i) => `${i.data.section}/${i.data.area_id}`));
+const publishedItemAreaKeys = new Set(
+  publishedItems.map((i) => `${i.data.section}/${i.data.area_id}`)
+);
 
 // Only include published areas that contain at least one published exercise/stretch
 const publishedAreas = areas.filter(
-  (a) => a.data.status === 'published' && publishedItemAreaKeys.has(`${a.data.section}/${a.data.area_id}`)
+  (a) =>
+    a.data.status === 'published' &&
+    publishedItemAreaKeys.has(`${a.data.section}/${a.data.area_id}`)
 );
 
 // Prepare search dataset
@@ -44,7 +45,16 @@ const searchIndex = [
   <div class="search-wrap">
     <header class="search-header">
       <div class="search-input-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="icon-search" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="icon-search"
+          aria-hidden="true"
+        >
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
@@ -69,7 +79,14 @@ const searchIndex = [
       <!-- Search results dynamically rendered here via safe DOM APIs -->
     </div>
 
-    <div id="searchAnnounce" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div
+      id="searchAnnounce"
+      class="visually-hidden"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+    </div>
 
     <footer class="search-footer">
       <p class="search-tip">
@@ -175,7 +192,7 @@ const searchIndex = [
   }
 
   .search-results:empty::before {
-    content: "Type an area name (e.g. Neck, Shoulder) or exercise to search.";
+    content: 'Type an area name (e.g. Neck, Shoulder) or exercise to search.';
     color: var(--ink-3);
     font-size: calc(14.5px * var(--scale));
     display: block;
@@ -329,10 +346,11 @@ const searchIndex = [
         return;
       }
 
-      const filtered = items.filter((item) =>
-        item.title.toLowerCase().includes(clean) ||
-        item.category.toLowerCase().includes(clean) ||
-        item.meta.toLowerCase().includes(clean)
+      const filtered = items.filter(
+        (item) =>
+          item.title.toLowerCase().includes(clean) ||
+          item.category.toLowerCase().includes(clean) ||
+          item.meta.toLowerCase().includes(clean)
       );
 
       if (filtered.length === 0) {
@@ -408,7 +426,9 @@ const searchIndex = [
         results.appendChild(groupDiv);
       });
 
-      announce(`${filtered.length} result${filtered.length === 1 ? '' : 's'} found. Use up and down arrow keys to navigate.`);
+      announce(
+        `${filtered.length} result${filtered.length === 1 ? '' : 's'} found. Use up and down arrow keys to navigate.`
+      );
     }
 
     input.addEventListener('input', () => {
@@ -447,7 +467,8 @@ const searchIndex = [
         updateSelection();
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        selectedIndex = (selectedIndex - 1 + currentRenderedItems.length) % currentRenderedItems.length;
+        selectedIndex =
+          (selectedIndex - 1 + currentRenderedItems.length) % currentRenderedItems.length;
         updateSelection();
       } else if (e.key === 'Enter') {
         if (selectedIndex >= 0 && selectedIndex < currentRenderedItems.length) {

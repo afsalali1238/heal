@@ -38,4 +38,17 @@ export default defineConfig({
     format: 'directory',
   },
   compressHTML: true,
+  server: {
+    /**
+     * Dev-server host allowlist (Vite's host-header check, CVE-2025-31125).
+     * Without this the review sandbox — which fronts the dev server on a
+     * generated `*.e2b.app` host — gets a 403 and the preview never loads.
+     *
+     * `dev`-only: the production build is static output served by Vercel and
+     * this block is not part of what ships. The entry is a suffix, so any
+     * preview subdomain of the review host works without loosening it to
+     * `true` (which would accept every Host header).
+     */
+    allowedHosts: ['.e2b.app', 'localhost', '127.0.0.1'],
+  },
 });

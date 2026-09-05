@@ -11,7 +11,10 @@ if (!asset) throw new Error('Prototype motion asset ex-neck-02 is not registered
 <Base title="PREVIEW | Chin Tuck movement" description="Internal draft movement review surface.">
   <a href="/preview/">Back to preview index</a>
   <h1>Chin Tuck prototype review</h1>
-  <p class="boundary">This page is an internal technical review surface. The movement has not been approved for patient use.</p>
+  <p class="boundary">
+    This page is an internal technical review surface. The movement has not been approved for
+    patient use.
+  </p>
   <ExerciseMotion asset={asset} title="Chin Tuck" />
   <dl class="metadata">
     <div><dt>Status</dt><dd>{asset.status}</dd></div>
@@ -24,5 +27,34 @@ if (!asset) throw new Error('Prototype motion asset ex-neck-02 is not registered
 </Base>
 
 <style>
-h1{font:700 calc(30px * var(--scale)) var(--f-display)}.boundary{max-width:65ch;color:var(--ink-2)}.metadata{margin:20px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}.metadata div{background:var(--surface);padding:12px}.metadata dt{font:600 calc(12px * var(--scale)) var(--f-display);text-transform:uppercase;color:var(--ink-3)}.metadata dd{margin:4px 0 0;overflow-wrap:anywhere}
+  h1 {
+    font: 700 calc(30px * var(--scale)) var(--f-display);
+  }
+  .boundary {
+    max-width: 65ch;
+    color: var(--ink-2);
+  }
+  .metadata {
+    margin: 20px 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .metadata div {
+    background: var(--surface);
+    padding: 12px;
+  }
+  .metadata dt {
+    font: 600 calc(12px * var(--scale)) var(--f-display);
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .metadata dd {
+    margin: 4px 0 0;
+    overflow-wrap: anywhere;
+  }
 </style>

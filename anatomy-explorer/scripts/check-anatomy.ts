@@ -60,15 +60,13 @@ const items = readJson('items.json');
 
 // The same rule library.ts applies: published area AND at least one published item.
 const populated = new Set(
-  items
-    .filter((i) => i.status === 'published')
-    .map((i) => `${i.section}/${i.area_id}`),
+  items.filter((i) => i.status === 'published').map((i) => `${i.section}/${i.area_id}`)
 );
 const reachableAreaIds = new Set(
   areas
     .filter((a) => a.status === 'published')
     .filter((a) => populated.has(`${a.section}/${a.area_id}`))
-    .map((a) => a.area_id!),
+    .map((a) => a.area_id!)
 );
 const allAreaIds = new Set(areas.map((a) => a.area_id!));
 const geometryAreaIds = new Set(GEOMETRY_REGIONS.map((r) => r.areaId));
@@ -81,7 +79,7 @@ for (const areaId of geometryAreaIds) {
     errors.push(
       `✗ region geometry "${areaId}" has no matching area_id in areas.json.\n` +
         '      A tappable shape with no possible content is a dead end (A-005).\n' +
-        '      Either the clinician adds the area to the sheet, or the region is removed from geometry/regions.ts.',
+        '      Either the clinician adds the area to the sheet, or the region is removed from geometry/regions.ts.'
     );
   }
 }
@@ -92,7 +90,7 @@ for (const areaId of reachableAreaIds) {
   if (!geometryAreaIds.has(areaId)) {
     errors.push(
       `✗ area "${areaId}" has published content but no region in geometry/regions.ts.\n` +
-        '      Patients can only reach it by browsing the section index — the body map cannot point at it (A-005).',
+        '      Patients can only reach it by browsing the section index — the body map cannot point at it (A-005).'
     );
   }
 }
@@ -102,7 +100,7 @@ for (const area of areas) {
   if (area.status !== 'published') continue;
   if (!populated.has(`${area.section}/${area.area_id}`)) {
     warnings.push(
-      `! area "${area.section}/${area.area_id}" is published but has no published items, so it is excluded from patient indexes and no region is drawn for it.`,
+      `! area "${area.section}/${area.area_id}" is published but has no published items, so it is excluded from patient indexes and no region is drawn for it.`
     );
   }
 }
@@ -141,7 +139,9 @@ for (const message of validateEducationEntries(EDUCATION_ENTRIES)) {
 // ── 6. Education pointing at a region that does not exist ───────────────────
 for (const entry of EDUCATION_ENTRIES) {
   if (!geometryAreaIds.has(entry.regionId)) {
-    warnings.push(`! education "${entry.id}" targets region "${entry.regionId}", which has no geometry.`);
+    warnings.push(
+      `! education "${entry.id}" targets region "${entry.regionId}", which has no geometry.`
+    );
   }
 }
 
@@ -152,22 +152,28 @@ if (draftEducation.length > 0) {
   warnings.push(
     `! ${draftEducation.length} education entr${draftEducation.length === 1 ? 'y is' : 'ies are'} still draft (${draftEducation
       .map((e) => e.id)
-      .join(', ')}). They are withheld from patients until a clinician signs them off.`,
+      .join(', ')}). They are withheld from patients until a clinician signs them off.`
   );
 }
 const draftSafety = SAFETY_RULES.filter((r) => r.status !== 'published');
 if (draftSafety.length > 0) {
   warnings.push(
-    `! ${draftSafety.length} of ${SAFETY_RULES.length} safety triggers are still draft. The gate is shown anyway, because stopping is the safe default — but the wording needs a clinician (A-007).`,
+    `! ${draftSafety.length} of ${SAFETY_RULES.length} safety triggers are still draft. The gate is shown anyway, because stopping is the safe default — but the wording needs a clinician (A-007).`
   );
 }
 
 // ── report ──────────────────────────────────────────────────────────────────
 console.log('\nAnatomy check — A-005 region derivation, A-007 gate, map copy compliance\n');
 console.log(`  areas in sheet:        ${areas.length}`);
-console.log(`  reachable areas:       ${reachableAreaIds.size}  (${[...reachableAreaIds].sort().join(', ') || 'none'})`);
-console.log(`  regions in geometry:   ${GEOMETRY_REGIONS.length} shapes over ${geometryAreaIds.size} areas`);
-console.log(`  map strings scanned:   ${GEOMETRY_REGIONS.length + SAFETY_RULES.length} against ${COMPLIANCE_RULES.length} rules`);
+console.log(
+  `  reachable areas:       ${reachableAreaIds.size}  (${[...reachableAreaIds].sort().join(', ') || 'none'})`
+);
+console.log(
+  `  regions in geometry:   ${GEOMETRY_REGIONS.length} shapes over ${geometryAreaIds.size} areas`
+);
+console.log(
+  `  map strings scanned:   ${GEOMETRY_REGIONS.length + SAFETY_RULES.length} against ${COMPLIANCE_RULES.length} rules`
+);
 console.log(`  compliance violations: ${violations}\n`);
 
 if (warnings.length > 0) {

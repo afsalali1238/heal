@@ -40,3 +40,21 @@ Skip link, landmarks, visible focus, keyboard-complete flow, screen-reader annou
 ## Print
 
 Hide navigation, controls, completion buttons, and interactive map chrome. Force black-on-white, avoid card splits, print disclaimer and source URL, and retain image alt/context.
+
+## Motion
+
+Updated 2026-09-05 (`docs/IMPROVEMENTS-2026-09-05.md`). The standing rule is still **almost none**: no page
+transitions, no carousels, no motion that competes with a dosage number. What is allowed, in `src/styles/motion.css`:
+
+- **State feedback** — hover lift, press, focus-ring fade. ≤220 ms.
+- **Orientation** — one-shot entrances on card groups, implemented with scroll-driven CSS inside
+  `@supports (animation-timeline: view())`. No JavaScript ships for it, and there is no `opacity: 0` base
+  state, because an unsupported browser must show the finished page rather than a blank one.
+- **The pacer** — the movement guide's glyph and countdown ring. The only animation that carries information,
+  and it starts only on an explicit press.
+
+Everything motion says, text also says. `prefers-reduced-motion` removes the animation, never the information.
+Concretely, in the one place motion carries information: the countdown ring is not slowed down but removed, and
+the rail under the guide head becomes the progress display — fed by the same per-second tick, with every number
+in its usual place. Nothing is stored to make motion work: the guide holds its counts in the page and loses them
+on close.

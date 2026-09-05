@@ -1,35 +1,69 @@
 name: CI
 
+# One app, one working directory. The workflow used to run at the repository
+# root, where there is no package.json at all — every step failed on `npm ci`
+# before it could say anything useful. Root-level docs are not a build target;
+# `anatomy-explorer/` is the whole product (A-011, A-012, A-014).
+
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  build-and-check:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: anatomy-explorer
+    env:
+      # Gates that warn in a branch build are errors on the release branch and on
+      # main, so a launch blocker cannot merge quietly. See AGENTS.md: never
+      # relax these — fix the content instead.
+      COMPLIANCE_STRICT: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
+      IMAGES_STRICT: ${{ github.ref == 'refs/heads/main' && '1' || '0' }}
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Use Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Lint
-      run: npm run lint
-      
-    # Environment variables for sync-content
-    - name: Sync content test
-      run: npm run sync:content
-      env:
-        SHEET_ID: ${{ secrets.SHEET_ID }}
-        
-    - name: Build
-      run: npm run build
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # package.json engines requires >=22.12; Node 20 could not even build
+          # this app, which is why the check suite had never run in CI.
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: anatomy-explorer/package-lock.json
+
+      - name: Install (lockfile must be in sync)
+        run: npm ci --no-audit --no-fund
+
+      - name: Format
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Content, compliance, anatomy, image and asset gates
+        run: npm run check:all
+
+      - name: Build
+        run: npx astro build
+
+      - name: Crawl built routes
+        run: npm run crawl
+
+      - name: Upload built site
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: static-site
+          path: anatomy-explorer/dist/client
+          if-no-files-found: warn
+          retention-days: 7

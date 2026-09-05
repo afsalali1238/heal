@@ -44,7 +44,7 @@ export function auditDist(
   distDir: string,
   areas: readonly AreaRow[],
   items: readonly ItemRow[],
-  legalSlugs: readonly string[] = ['disclaimer', 'privacy', 'credits'],
+  legalSlugs: readonly string[] = ['disclaimer', 'privacy', 'credits']
 ): CrawlResult {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -162,7 +162,7 @@ export function auditDist(
         html.includes(`id=${item.id}`);
       if (!hasId) {
         errors.push(
-          `✗ Rendered area page "${areaRoute}" is missing required anchor for published item id="${item.id}".`,
+          `✗ Rendered area page "${areaRoute}" is missing required anchor for published item id="${item.id}".`
         );
       } else {
         anchorsVerified += 1;
@@ -179,7 +179,7 @@ export function auditDist(
       const robotsMatch = html.match(/<meta[^>]+name=["']robots["'][^>]*>/i);
       if (!robotsMatch || !robotsMatch[0].toLowerCase().includes('noindex')) {
         errors.push(
-          `✗ Preview route "${route}" is missing required <meta name="robots" content="noindex..."> tag. Draft clinical content must never be indexed.`,
+          `✗ Preview route "${route}" is missing required <meta name="robots" content="noindex..."> tag. Draft clinical content must never be indexed.`
         );
       }
     } else {
@@ -188,7 +188,7 @@ export function auditDist(
         const href = match[1];
         if (href.startsWith('/preview') || href.includes('/preview/')) {
           errors.push(
-            `✗ Patient-facing route "${route}" contains a link to preview route "${href}". Draft preview routes must remain isolated from patient navigation.`,
+            `✗ Patient-facing route "${route}" contains a link to preview route "${href}". Draft preview routes must remain isolated from patient navigation.`
           );
         }
       }
@@ -198,14 +198,16 @@ export function auditDist(
   // 8. Pluralization check (Decision A-015: /exercise/, never /exercises/)
   for (const [route, html] of renderedContent) {
     if (route.startsWith('/exercises/')) {
-      errors.push(`✗ Generated route "${route}" uses plural /exercises/. Decision A-015 requires singular /exercise/.`);
+      errors.push(
+        `✗ Generated route "${route}" uses plural /exercises/. Decision A-015 requires singular /exercise/.`
+      );
     }
 
     for (const match of html.matchAll(/\bhref=["']([^"']+)["']/gi)) {
       const href = match[1];
       if (href.startsWith('/exercises/')) {
         errors.push(
-          `✗ Route "${route}" contains plural link "${href}". Decision A-015 requires singular /exercise/.`,
+          `✗ Route "${route}" contains plural link "${href}". Decision A-015 requires singular /exercise/.`
         );
       }
     }
@@ -231,7 +233,9 @@ export function auditDist(
 
       const targetFile = routeToFile(cleanPath);
       if (!fs.existsSync(targetFile)) {
-        errors.push(`✗ Route "${route}" contains broken internal link to "${cleanPath}" (file not found).`);
+        errors.push(
+          `✗ Route "${route}" contains broken internal link to "${cleanPath}" (file not found).`
+        );
       }
     }
   }
@@ -258,7 +262,12 @@ function run(): void {
   const vanillaDistDir = path.join(baseDir, 'dist');
 
   let distDir: string;
-  if (fs.existsSync(vercelClientDir) && fs.readdirSync(vercelClientDir).some(f => f.endsWith('.html') || fs.statSync(path.join(vercelClientDir, f)).isDirectory())) {
+  if (
+    fs.existsSync(vercelClientDir) &&
+    fs
+      .readdirSync(vercelClientDir)
+      .some((f) => f.endsWith('.html') || fs.statSync(path.join(vercelClientDir, f)).isDirectory())
+  ) {
     distDir = vercelClientDir;
     console.log(`  Detected Vercel adapter output: using dist/client/`);
   } else {
@@ -307,7 +316,9 @@ function run(): void {
     process.exit(1);
   }
 
-  console.log('\n✓ Route crawl clean: All canonical routes, anchors, legal pages, and preview isolation verified.');
+  console.log(
+    '\n✓ Route crawl clean: All canonical routes, anchors, legal pages, and preview isolation verified.'
+  );
 }
 
 import { fileURLToPath } from 'node:url';
@@ -316,4 +327,3 @@ const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPat
 if (isMain) {
   run();
 }
-

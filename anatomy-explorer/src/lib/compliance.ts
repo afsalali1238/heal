@@ -42,14 +42,54 @@ export interface Violation {
 
 /** Superlatives and guarantees. Named explicitly in the DHA standard. */
 const SUPERLATIVES: readonly ComplianceRule[] = [
-  { id: 'best', pattern: /\b(the\s+)?best\b/i, severity: 'error', reason: 'Superlative claim banned by DHA advertisement content standards.' },
-  { id: 'safest', pattern: /\bsafest\b/i, severity: 'error', reason: 'Superlative claim banned by DHA advertisement content standards.' },
-  { id: 'unique', pattern: /\bunique\b/i, severity: 'error', reason: 'Superlative claim banned by DHA advertisement content standards.' },
-  { id: 'one-of-a-kind', pattern: /\bone[\s-]of[\s-]a[\s-]kind\b/i, severity: 'error', reason: 'Superlative claim banned by DHA advertisement content standards.' },
-  { id: 'exclusive', pattern: /\bexclusive(ly)?\b/i, severity: 'error', reason: 'Superlative claim banned by DHA advertisement content standards.' },
-  { id: 'miraculous', pattern: /\bmiracle|miraculous\b/i, severity: 'error', reason: 'Superlative claim banned by DHA advertisement content standards.' },
-  { id: 'guarantee', pattern: /\bguarantee(d|s)?\b/i, severity: 'error', reason: 'Guarantees are banned by DHA advertisement content standards.' },
-  { id: 'percent-claim', pattern: /\b100\s*%\s*(effective|safe|success|guaranteed|results?)\b/i, severity: 'error', reason: 'Unsubstantiated outcome claim.' },
+  {
+    id: 'best',
+    pattern: /\b(the\s+)?best\b/i,
+    severity: 'error',
+    reason: 'Superlative claim banned by DHA advertisement content standards.',
+  },
+  {
+    id: 'safest',
+    pattern: /\bsafest\b/i,
+    severity: 'error',
+    reason: 'Superlative claim banned by DHA advertisement content standards.',
+  },
+  {
+    id: 'unique',
+    pattern: /\bunique\b/i,
+    severity: 'error',
+    reason: 'Superlative claim banned by DHA advertisement content standards.',
+  },
+  {
+    id: 'one-of-a-kind',
+    pattern: /\bone[\s-]of[\s-]a[\s-]kind\b/i,
+    severity: 'error',
+    reason: 'Superlative claim banned by DHA advertisement content standards.',
+  },
+  {
+    id: 'exclusive',
+    pattern: /\bexclusive(ly)?\b/i,
+    severity: 'error',
+    reason: 'Superlative claim banned by DHA advertisement content standards.',
+  },
+  {
+    id: 'miraculous',
+    pattern: /\bmiracle|miraculous\b/i,
+    severity: 'error',
+    reason: 'Superlative claim banned by DHA advertisement content standards.',
+  },
+  {
+    id: 'guarantee',
+    pattern: /\bguarantee(d|s)?\b/i,
+    severity: 'error',
+    reason: 'Guarantees are banned by DHA advertisement content standards.',
+  },
+  {
+    id: 'percent-claim',
+    pattern: /\b100\s*%\s*(effective|safe|success|guaranteed|results?)\b/i,
+    severity: 'error',
+    reason: 'Unsubstantiated outcome claim.',
+  },
 ];
 
 /**
@@ -58,7 +98,12 @@ const SUPERLATIVES: readonly ComplianceRule[] = [
  * the place for — so we ban them outright rather than try to qualify them.
  */
 const OUTCOME_CLAIMS: readonly ComplianceRule[] = [
-  { id: 'cure', pattern: /\bcure(s|d)?\b/i, severity: 'error', reason: 'Outcome claim. Education copy must not promise a result.' },
+  {
+    id: 'cure',
+    pattern: /\bcure(s|d)?\b/i,
+    severity: 'error',
+    reason: 'Outcome claim. Education copy must not promise a result.',
+  },
   {
     id: 'fix',
     // "fix your gaze on a point" is standard physiotherapy instruction for
@@ -66,10 +111,21 @@ const OUTCOME_CLAIMS: readonly ComplianceRule[] = [
     // use of "fix" reads as a promise to repair the patient.
     pattern: /\bfix(es|ed|ing)?\b(?!\s+(your|the|a)\s+(gaze|eyes?|vision|point|attention))/i,
     severity: 'error',
-    reason: 'Outcome claim. Education copy must not promise to repair anything. ("fix your gaze" is allowed.)',
+    reason:
+      'Outcome claim. Education copy must not promise to repair anything. ("fix your gaze" is allowed.)',
   },
-  { id: 'heal-promise', pattern: /\bwill\s+(heal|cure|repair|resolve|eliminate)\b/i, severity: 'error', reason: 'Outcome claim stated as certainty.' },
-  { id: 'permanent', pattern: /\bpermanent(ly)?\s+(relief|cure|fix|solution)\b/i, severity: 'error', reason: 'Outcome claim.' },
+  {
+    id: 'heal-promise',
+    pattern: /\bwill\s+(heal|cure|repair|resolve|eliminate)\b/i,
+    severity: 'error',
+    reason: 'Outcome claim stated as certainty.',
+  },
+  {
+    id: 'permanent',
+    pattern: /\bpermanent(ly)?\s+(relief|cure|fix|solution)\b/i,
+    severity: 'error',
+    reason: 'Outcome claim.',
+  },
 ];
 
 /**
@@ -78,11 +134,36 @@ const OUTCOME_CLAIMS: readonly ComplianceRule[] = [
  * rules." This is the highest-consequence group in the file.
  */
 const BOOKING_CTAS: readonly ComplianceRule[] = [
-  { id: 'book-now', pattern: /\bbook\s+(now|your|an?|today)\b/i, severity: 'error', reason: 'Booking CTA reclassifies the site as medical advertisement (MOHAP).' },
-  { id: 'appointment', pattern: /\b(schedule|make|request|reserve)\s+(an?\s+)?appointment\b/i, severity: 'error', reason: 'Booking CTA reclassifies the site as medical advertisement (MOHAP).' },
-  { id: 'call-to-book', pattern: /\bcall\s+(us\s+)?(now|today)\s+to\s+book\b/i, severity: 'error', reason: 'Booking CTA reclassifies the site as medical advertisement (MOHAP).' },
-  { id: 'free-consultation', pattern: /\bfree\s+(consultation|assessment|session|trial)\b/i, severity: 'error', reason: 'Promotional offer. Advertisement, not education.' },
-  { id: 'limited-offer', pattern: /\b(limited\s+(time|offer)|special\s+offer|discount)\b/i, severity: 'error', reason: 'Promotional offer. Advertisement, not education.' },
+  {
+    id: 'book-now',
+    pattern: /\bbook\s+(now|your|an?|today)\b/i,
+    severity: 'error',
+    reason: 'Booking CTA reclassifies the site as medical advertisement (MOHAP).',
+  },
+  {
+    id: 'appointment',
+    pattern: /\b(schedule|make|request|reserve)\s+(an?\s+)?appointment\b/i,
+    severity: 'error',
+    reason: 'Booking CTA reclassifies the site as medical advertisement (MOHAP).',
+  },
+  {
+    id: 'call-to-book',
+    pattern: /\bcall\s+(us\s+)?(now|today)\s+to\s+book\b/i,
+    severity: 'error',
+    reason: 'Booking CTA reclassifies the site as medical advertisement (MOHAP).',
+  },
+  {
+    id: 'free-consultation',
+    pattern: /\bfree\s+(consultation|assessment|session|trial)\b/i,
+    severity: 'error',
+    reason: 'Promotional offer. Advertisement, not education.',
+  },
+  {
+    id: 'limited-offer',
+    pattern: /\b(limited\s+(time|offer)|special\s+offer|discount)\b/i,
+    severity: 'error',
+    reason: 'Promotional offer. Advertisement, not education.',
+  },
 ];
 
 /**
@@ -140,7 +221,8 @@ const CONDITION_NAMES: readonly ComplianceRule[] = (
   // not rely on the list never gaining a "." or "(").
   pattern: new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i'),
   severity: 'error' as const,
-  reason: 'Condition name. The site is organised by body area only — no diagnosis language (non-negotiable #3).',
+  reason:
+    'Condition name. The site is organised by body area only — no diagnosis language (non-negotiable #3).',
 }));
 
 /**
@@ -178,7 +260,7 @@ export const PLACEHOLDER_MARKER = 'TO BE SUPPLIED';
 export function scanText(
   text: string,
   field: string,
-  rules: readonly ComplianceRule[] = COMPLIANCE_RULES,
+  rules: readonly ComplianceRule[] = COMPLIANCE_RULES
 ): Violation[] {
   if (!text) return [];
   const violations: Violation[] = [];
@@ -205,7 +287,7 @@ export function scanText(
 export function scanRecord(
   record: Readonly<Record<string, unknown>>,
   skipFields: readonly string[] = [],
-  rules: readonly ComplianceRule[] = COMPLIANCE_RULES,
+  rules: readonly ComplianceRule[] = COMPLIANCE_RULES
 ): Violation[] {
   const violations: Violation[] = [];
   for (const [key, value] of Object.entries(record)) {

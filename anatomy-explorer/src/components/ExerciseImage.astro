@@ -23,7 +23,7 @@
  * review unapproved work, so there it renders with the status shown.
  */
 import { Image } from 'astro:assets';
-import { getImage } from '../lib/images';
+import { pickFigure } from '../lib/images';
 
 interface Props {
   imageId?: string;
@@ -58,13 +58,19 @@ const usableAlt = typeof alt === 'string' && alt.trim().length > 0 ? alt.trim() 
  * on disk, told the patient "Image file missing". That reads as a broken
  * website rather than as work in progress, and it is the wrong fact.
  */
-const onDisk = imageId ? await getImage(imageId) : null;
-// A 1x1 file is a build placeholder, not a usable clinical illustration.
-// Treat it as unavailable so Astro does not upscale an empty pixel into a
-// full-size figure on patient or preview pages.
-const isPlaceholder = Boolean(onDisk && onDisk.width <= 1 && onDisk.height <= 1);
-const resolved = mayRender && usableAlt && !isPlaceholder ? onDisk : null;
-const isSvg = typeof resolved?.src === 'string' && resolved.src.endsWith('.svg');
+/**
+ * A 1×1 file is a build placeholder, not a clinical illustration, and a generated
+ * schematic is not a photograph either — so the lookup returns both the image and
+ * what kind it is. `pickFigure` prefers a real file; the schematic only appears where
+ * there is nothing real, which is the whole reason it exists.
+ */
+const picked = imageId ? await pickFigure(imageId) : null;
+const mayShow = mayRender && Boolean(usableAlt) && Boolean(picked);
+const resolved = mayShow ? picked!.image : null;
+const schematic = mayShow && picked!.kind === 'schematic';
+// An SVG with CSS keyframes must not go through the image optimiser: rasterising it
+// bakes one frame and silently kills the movement it was drawn to show.
+const isSvg = schematic || typeof resolved?.src === 'string';
 
 /**
  * Patient-facing wording, in the order the reasons actually apply. None of
@@ -77,17 +83,15 @@ const slotReason = !imageId
     ? 'Picture held back — it has no description yet'
     : !approved && !preview
       ? 'Picture waiting to be checked by your physiotherapist'
-      : !onDisk
+      : !picked
         ? 'Picture not added yet'
-        : isPlaceholder
-          ? 'Picture not added yet'
         : 'Picture awaiting approval';
 ---
 
 {
   resolved ? (
     <figure class="shot">
-      {isSvg ? (
+      {schematic || isSvg ? (
         <img
           src={resolved.src}
           alt={usableAlt}
@@ -110,9 +114,10 @@ const slotReason = !imageId
         />
       )}
       {preview && !approved && (
-        <figcaption class="shot__flag">
-          Not approved — {imageStatus ?? 'no status'}
-        </figcaption>
+        <figcaption class="shot__flag">Not approved — {imageStatus ?? 'no status'}</figcaption>
+      )}
+      {schematic && (
+        <figcaption class="shot__flag shot__flag--soft">Schematic · not a photograph</figcaption>
       )}
     </figure>
   ) : (
@@ -142,6 +147,11 @@ const slotReason = !imageId
     background-color: var(--slot);
     display: block;
     border-radius: var(--r-inner);
+  }
+
+  .shot__flag--soft {
+    background: var(--slot, #f3f4f6);
+    color: var(--ink-3, #6b7280);
   }
 
   .shot__flag {

@@ -1,0 +1,205 @@
+---
+/**
+ * A body figure for one area, drawn from the app's own joint table.
+ *
+ * Used wherever the product needs to say *where on the body* without saying
+ * anything clinical: the area landing page, the section index cards, the home
+ * entrance, print handouts. `figures.ts` explains why these are generated and
+ * not drawn — briefly, because a hand-drawn figure drifts from the map, and a
+ * patient reads the figure instead of the sentence.
+ *
+ * It is deliberately `aria-hidden` by default. The name of the area is already
+ * in the heading next to it, so announcing the same word twice to a screen
+ * reader is noise, not information. Where the figure is the only carrier of
+ * meaning, pass `label` and it becomes a labelled `img` role instead.
+ */
+import {
+  figureParts,
+  buildGlyph,
+  preferredView,
+  type MotionGlyph,
+} from '../../lib/anatomy/figures';
+import type { BodyView } from '../../lib/anatomy/geometry/regions';
+
+interface Props {
+  areaId: string;
+  /** Defaults to whichever view actually has geometry for this area. */
+  view?: BodyView;
+  /** Frame on the area instead of showing the whole body. */
+  zoom?: boolean;
+  /** Draw the movement glyph for a `type` value, when one is known. */
+  glyph?: MotionGlyph | null;
+  /** Slow breathing loop. Decorative surfaces only; data surfaces stay still. */
+  animated?: boolean;
+  label?: string;
+  class?: string;
+}
+
+const {
+  areaId,
+  view,
+  zoom = false,
+  glyph = null,
+  animated = false,
+  label,
+  class: className = '',
+} = Astro.props;
+
+const parts = figureParts(areaId, view, zoom);
+const chosenView = view ?? preferredView(areaId);
+const built = glyph ? buildGlyph(areaId, glyph, chosenView) : null;
+const [originX, originY] = built?.origin ?? [120, 300];
+---
+
+<figure
+  class:list={[
+    'figure',
+    `view-${chosenView}`,
+    { 'is-focused': parts.focused, [className]: Boolean(className) },
+  ]}
+  {...animated ? { 'data-figure-animated': '', 'data-animate-glyph': '' } : {}}
+>
+  <svg
+    viewBox={parts.viewBox}
+    {...label
+      ? { role: 'img', 'aria-label': label }
+      : { 'aria-hidden': 'true', focusable: 'false' }}
+    preserveAspectRatio="xMidYMid meet"
+  >
+    <g class="figure-body">
+      <g class="body-fill">
+        {parts.filled.map((d) => <path d={d} />)}
+      </g>
+      <g class="body-line">
+        {parts.strokes.map((s) => <path d={s.d} stroke-width={s.w} />)}
+      </g>
+      <g class="body-detail">
+        {parts.detail.map((d) => <path d={d} />)}
+      </g>
+      <g class="body-region">
+        {parts.highlight.map((h) => <path d={h.d} stroke-width={h.w} />)}
+      </g>
+      {
+        built && (
+          <g
+            class="glyph-moving"
+            style={`--glyph-origin: ${originX}px ${originY}px; --glyph-animation: ${built.animation};`}
+          >
+            {built.static.map((d) => (
+              <path d={d} class="glyph-static" />
+            ))}
+            {built.moving.map((d) => (
+              <path d={d} />
+            ))}
+          </g>
+        )
+      }
+    </g>
+  </svg>
+  {label && <figcaption>{label}</figcaption>}
+</figure>
+
+<style>
+  .figure {
+    margin: 0;
+    display: grid;
+    gap: 6px;
+    justify-items: center;
+  }
+
+  svg {
+    display: block;
+    block-size: 100%;
+    max-inline-size: 100%;
+    inline-size: auto;
+    min-block-size: 84px;
+    overflow: visible;
+  }
+
+  figcaption {
+    font-family: var(--f-display);
+    font-size: calc(var(--fs-micro) * var(--scale));
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  /*
+ * The palette is the page's tokens, so the figure follows dark mode, the
+ * clinic's brand and the text-size control with no extra work. `body` sits one
+ * step under the surface so it never out-shouts the instructions beside it.
+ */
+  .body-fill path {
+    fill: var(--figure-body, var(--slot-line));
+  }
+  .body-line path {
+    fill: none;
+    stroke: var(--figure-body, var(--slot-line));
+    stroke-linecap: round;
+  }
+  .body-detail path {
+    fill: none;
+    stroke: var(--surface);
+    stroke-width: 3;
+    stroke-linecap: round;
+    opacity: 0.75;
+  }
+  .body-region path {
+    fill: none;
+    stroke: var(--figure-accent, var(--brand));
+    stroke-linecap: round;
+    opacity: 0.42;
+  }
+  .is-focused .body-region path {
+    opacity: 0.55;
+    animation: halo 5.5s var(--ease-in-out, ease-in-out) infinite;
+  }
+
+  .glyph-moving path {
+    fill: none;
+    stroke: var(--figure-accent, var(--brand));
+    stroke-width: 6.5;
+    stroke-linecap: round;
+    opacity: 0.95;
+  }
+  .glyph-static {
+    opacity: 0.5;
+  }
+
+  /* The pacer glyph only moves when the patient asked for it (see MovementGuide:
+   nothing animates on its own before the first press). */
+  .figure[data-figure-animated] .figure-body {
+    transform-box: fill-box;
+  }
+  .glyph-moving {
+    transform-origin: var(--glyph-origin);
+    transform-box: view-box;
+  }
+  .figure[data-animate-glyph] .glyph-moving {
+    animation: var(--glyph-animation) 2.6s var(--ease-in-out, ease-in-out) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .is-focused .body-region path {
+      animation: none;
+    }
+    .figure[data-animate-glyph] .glyph-moving {
+      animation: none;
+    }
+  }
+
+  @media print {
+    .glyph-moving {
+      display: none;
+    }
+    .body-fill path,
+    .body-line path {
+      stroke: #9aa1ab;
+      fill: #e6e8ec;
+    }
+    .body-region path {
+      stroke: #12433a;
+      opacity: 0.6;
+    }
+  }
+</style>

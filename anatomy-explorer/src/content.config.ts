@@ -4,12 +4,12 @@ import { areaSchema, itemSchema, legalSchema } from './lib/schemas';
 
 const areas = defineCollection({
   loader: file('src/data/areas.json'),
-  schema: areaSchema
+  schema: areaSchema,
 });
 
 const items = defineCollection({
   loader: file('src/data/items.json'),
-  schema: itemSchema
+  schema: itemSchema,
 });
 
 /**
@@ -19,7 +19,7 @@ const items = defineCollection({
  */
 const legal = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/legal' }),
-  schema: legalSchema
+  schema: legalSchema,
 });
 
 export const collections = { areas, items, legal };

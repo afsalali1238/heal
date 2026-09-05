@@ -14,8 +14,8 @@ Nothing in this file has been applied. Everything below needs the physiotherapis
 
 **`ex-shoulder-01` (Shoulder Rolls) points at a neck photograph.**
 
-| Column | Current | Should be |
-|---|---|---|
+| Column     | Current      | Should be        |
+| ---------- | ------------ | ---------------- |
 | `image_id` | `ex-neck-04` | `ex-shoulder-01` |
 
 `validate.ts` rule `image-area-mismatch`. A shoulder exercise beside a picture of a neck is a
@@ -34,20 +34,20 @@ to anything.
 `validate.ts` rule `alt-text-too-thin`. The floor exists because alt text is read aloud to a
 patient using a screen reader, and it has to let them **do the exercise from the description
 alone** — so it must describe the position, not name the movement. `compliance.ts` deliberately
-does *not* exempt `image_alt_en` from the banned-term scan for the same reason.
+does _not_ exempt `image_alt_en` from the banned-term scan for the same reason.
 
 **The drafts below are drafts.** They are assembled from the clinician's own
 `start_position_en` and `movement_en` wording for that same row — nothing new was invented — but
 describing a body position is clinical content, so **every one needs her review and edit before it
 goes in the sheet.** Ship them as her words, not these.
 
-| id | Current (chars) | Draft replacement — needs clinician review |
-|---|---|---|
-| `ex-neck-01` | "Person sitting moving head." (27) | Person seated upright on a chair, feet flat on the floor, slowly turning the head to one side with the shoulders still. |
-| `ex-neck-02` | "Person making double chin." (26) | Person seated upright, shoulders relaxed, drawing the chin straight back towards the throat with the eyes staying level. |
-| `ex-shoulder-01` | "Person rolling shoulders." (25) | Person seated upright, rolling both shoulders up towards the ears, then back and down in a smooth circle. |
-| `str-neck-01` | "Person sitting stretching neck to side." (39) | Person seated upright, feet flat, right ear lowered towards the right shoulder while the left shoulder stays down. |
-| `str-neck-02` | "Person looking down towards armpit." (35) | Person seated upright with the head turned about 45 degrees to the right, looking down towards the right armpit. |
+| id               | Current (chars)                                | Draft replacement — needs clinician review                                                                               |
+| ---------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `ex-neck-01`     | "Person sitting moving head." (27)             | Person seated upright on a chair, feet flat on the floor, slowly turning the head to one side with the shoulders still.  |
+| `ex-neck-02`     | "Person making double chin." (26)              | Person seated upright, shoulders relaxed, drawing the chin straight back towards the throat with the eyes staying level. |
+| `ex-shoulder-01` | "Person rolling shoulders." (25)               | Person seated upright, rolling both shoulders up towards the ears, then back and down in a smooth circle.                |
+| `str-neck-01`    | "Person sitting stretching neck to side." (39) | Person seated upright, feet flat, right ear lowered towards the right shoulder while the left shoulder stays down.       |
+| `str-neck-02`    | "Person looking down towards armpit." (35)     | Person seated upright with the head turned about 45 degrees to the right, looking down towards the right armpit.         |
 
 Each draft is 108–125 characters and clears the floor with room to spare.
 
@@ -86,13 +86,13 @@ Medical Director is accountable for content approval (RESEARCH-FINDINGS §4).
 
 Only four image files exist, and they do not line up with what the published rows ask for:
 
-| Referenced by a published row | File on disk? |
-|---|---|
-| `ex-neck-01` | yes |
-| `ex-neck-02` | **no** |
-| `ex-neck-04` (the mismatch above) | **no** |
-| `str-neck-01` | **no** |
-| `str-neck-02` | yes |
+| Referenced by a published row     | File on disk? |
+| --------------------------------- | ------------- |
+| `ex-neck-01`                      | yes           |
+| `ex-neck-02`                      | **no**        |
+| `ex-neck-04` (the mismatch above) | **no**        |
+| `str-neck-01`                     | **no**        |
+| `str-neck-02`                     | yes           |
 
 And two files exist that no published row references: `ex-neck-05`, `str-neck-03`.
 

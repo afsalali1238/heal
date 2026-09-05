@@ -98,6 +98,28 @@ for (const item of publishedItems) {
   }
 }
 
+// Draft rows are never errors — see the note above — but they are no longer
+// invisible either. A drafted row that says "frozen shoulder" or "the best
+// stretch for sciatica" is a problem worth telling the reviewer about now, in
+// the preview queue, rather than after it reaches the published tab and fails a
+// build. So: same rules, warning only, and machine fields like internal notes
+// are excluded so a note that *names* the banned phrase is not a violation.
+const draftItems = items.filter((i) => i.status !== 'published' && i.status !== 'retired');
+let draftAdvisories = 0;
+for (const item of draftItems) {
+  const found: Violation[] = scanRecord(
+    item as unknown as Record<string, unknown>,
+    [...NON_PROSE_FIELDS, 'notes_internal', 'reviewed_by', 'reviewed_date'],
+    COMPLIANCE_RULES
+  );
+  for (const v of found) {
+    draftAdvisories += 1;
+    warnings.push(
+      `! draft item "${item.id}" still matches banned wording — ${v.match} [${v.ruleId}]. Fix it before the row can be published.`
+    );
+  }
+}
+
 for (const area of publishedAreas) {
   const found: Violation[] = scanRecord(area, NON_PROSE_FIELDS, COMPLIANCE_RULES);
   for (const v of found) {
@@ -106,16 +128,24 @@ for (const area of publishedAreas) {
   }
 }
 
-for (const entry of EDUCATION_ENTRIES.filter(e => e.status === 'published')) {
-  const found: Violation[] = scanRecord(entry, ['id', 'regionId', 'status', 'reviewedBy', 'version'], COMPLIANCE_RULES);
+for (const entry of EDUCATION_ENTRIES.filter((e) => e.status === 'published')) {
+  const found: Violation[] = scanRecord(
+    entry,
+    ['id', 'regionId', 'status', 'reviewedBy', 'version'],
+    COMPLIANCE_RULES
+  );
   for (const v of found) {
     termViolations += 1;
     errors.push(formatViolation(`education "${entry.id}"`, v));
   }
 }
 
-for (const rule of SAFETY_RULES.filter(r => r.status === 'published')) {
-  const found: Violation[] = scanRecord(rule, ['id', 'status', 'reviewedBy', 'version'], COMPLIANCE_RULES);
+for (const rule of SAFETY_RULES.filter((r) => r.status === 'published')) {
+  const found: Violation[] = scanRecord(
+    rule,
+    ['id', 'status', 'reviewedBy', 'version'],
+    COMPLIANCE_RULES
+  );
   for (const v of found) {
     termViolations += 1;
     errors.push(formatViolation(`safety rule "${rule.id}"`, v));
@@ -123,7 +153,11 @@ for (const rule of SAFETY_RULES.filter(r => r.status === 'published')) {
 }
 
 for (const region of GEOMETRY_REGIONS) {
-  const found: Violation[] = scanRecord(region, ['id', 'areaId', 'side', 'views', 'shapes', 'zones'], COMPLIANCE_RULES);
+  const found: Violation[] = scanRecord(
+    region,
+    ['id', 'areaId', 'side', 'views', 'shapes', 'zones'],
+    COMPLIANCE_RULES
+  );
   for (const v of found) {
     termViolations += 1;
     errors.push(formatViolation(`geometry region "${region.id}"`, v));
@@ -159,7 +193,9 @@ function readLegalDocs(): LegalDoc[] {
   }
   const files = readdirSync(LEGAL_DIR).filter((f) => f.endsWith('.md'));
   if (files.length === 0) {
-    errors.push('✗ src/content/legal/ is empty. MODULES.md M12 requires disclaimer, privacy and credits.');
+    errors.push(
+      '✗ src/content/legal/ is empty. MODULES.md M12 requires disclaimer, privacy and credits.'
+    );
     return [];
   }
   return files.map((f) => {
@@ -204,7 +240,7 @@ const missing = missingClinicFields();
 if (missing.length > 0) {
   gate(
     `${STRICT ? '✗' : '!'} src/config/clinic.ts has ${missing.length} unfilled value(s): ${missing.join(', ')}.\n` +
-      '      The disclaimer cannot satisfy RESEARCH-FINDINGS §4 until the clinic supplies these.',
+      '      The disclaimer cannot satisfy RESEARCH-FINDINGS §4 until the clinic supplies these.'
   );
 }
 
@@ -213,7 +249,7 @@ if (CLINIC.lastContentReview && /^\d{4}-\d{2}-\d{2}$/.test(CLINIC.lastContentRev
   if (ageDays > 365) {
     gate(
       `${STRICT ? '✗' : '!'} Content was last reviewed ${Math.floor(ageDays)} days ago (${CLINIC.lastContentReview}).\n` +
-        '      The disclaimer states a review date to patients; a stale one misrepresents it.',
+        '      The disclaimer states a review date to patients; a stale one misrepresents it.'
     );
   }
 }
@@ -227,7 +263,7 @@ for (const doc of legalDocs) {
   if (!approved || approved === 'null') {
     gate(
       `${STRICT ? '✗' : '!'} legal/${doc.file} has approvedBy: null — wording is still an unapproved draft.\n` +
-        "      RESEARCH-FINDINGS §4 makes the clinic's Medical Director accountable for content approval.",
+        "      RESEARCH-FINDINGS §4 makes the clinic's Medical Director accountable for content approval."
     );
   }
 }
@@ -252,7 +288,7 @@ for (const item of publishedItems) {
         item.image_status ? `"${item.image_status}"` : '(unset)'
       }.\n` +
         '      IMAGE-PIPELINE.md: only `approved` ships. The card will render a placeholder until the\n' +
-        '      physiotherapist signs the image off against its instruction text.',
+        '      physiotherapist signs the image off against its instruction text.'
     );
   }
 }
@@ -323,7 +359,7 @@ for (const file of SCAN_ROOTS.flatMap((root) => walk(join(process.cwd(), root)))
     errors.push(
       `✗ ${rel} references third-party origin "${host}".\n` +
         "      Non-negotiable #6: no assets from hosts we don't control. Self-host it, or add the\n" +
-        '      host to ALLOWED_HOSTS in this script with a note on why it issues no request.',
+        '      host to ALLOWED_HOSTS in this script with a note on why it issues no request.'
     );
   }
 }
@@ -332,8 +368,13 @@ for (const file of SCAN_ROOTS.flatMap((root) => walk(join(process.cwd(), root)))
 
 console.log('Compliance check — MODULES.md M12');
 console.log(
-  `  scanned ${publishedItems.length} published item(s), ${publishedAreas.length} published area(s), ${legalDocs.length} legal document(s)`,
+  `  scanned ${publishedItems.length} published item(s), ${publishedAreas.length} published area(s), ${legalDocs.length} legal document(s)`
 );
+if (draftItems.length > 0) {
+  console.log(
+    `  ${draftItems.length} draft item(s) advisorily scanned (never blocking) — ${draftAdvisories} wording ${draftAdvisories === 1 ? 'issue' : 'issues'}`
+  );
+}
 console.log(`  ${COMPLIANCE_RULES.length} rules active${STRICT ? ' · STRICT mode' : ''}`);
 
 if (warnings.length > 0) {
@@ -345,7 +386,7 @@ if (errors.length > 0) {
   console.error(`\n${errors.length} error(s):`);
   for (const e of errors) console.error(e);
   console.error(
-    `\nBuild refused. ${termViolations > 0 ? 'Banned wording must be changed in the Google Sheet, not in src/data/.' : 'Fix the errors above and re-run.'}`,
+    `\nBuild refused. ${termViolations > 0 ? 'Banned wording must be changed in the Google Sheet, not in src/data/.' : 'Fix the errors above and re-run.'}`
   );
   process.exit(1);
 }
@@ -353,6 +394,6 @@ if (errors.length > 0) {
 console.log(
   warnings.length > 0
     ? '\nNo banned wording found. Warnings above must be cleared before go-live.'
-    : '\nClean.',
+    : '\nClean.'
 );
 if (!STRICT) console.log('Set COMPLIANCE_STRICT=1 in production to enforce the warnings above.');

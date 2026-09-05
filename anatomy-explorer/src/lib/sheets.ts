@@ -68,10 +68,16 @@ export async function getPreviewData(sheetId: string) {
    * invalid rows tells her the opposite of the truth. Failures are now
    * collected and returned so the page can show them.
    */
-  const collect = <T,>(
+  const collect = <T>(
     rows: unknown[],
-    schema: { safeParse: (v: unknown) => { success: boolean; data?: T; error?: { issues: { path: PropertyKey[]; message: string }[] } } },
-    tab: 'areas' | 'items',
+    schema: {
+      safeParse: (v: unknown) => {
+        success: boolean;
+        data?: T;
+        error?: { issues: { path: PropertyKey[]; message: string }[] };
+      };
+    },
+    tab: 'areas' | 'items'
   ): T[] => {
     const ok: T[] = [];
     rows.forEach((row, i) => {
@@ -86,7 +92,7 @@ export async function getPreviewData(sheetId: string) {
         row: i + 2,
         id: String((row as Record<string, unknown>)?.id ?? '(no id)'),
         messages: (result.error?.issues ?? []).map(
-          (issue) => `${issue.path.join('.') || '(row)'}: ${issue.message}`,
+          (issue) => `${issue.path.join('.') || '(row)'}: ${issue.message}`
         ),
       });
     });
@@ -99,10 +105,10 @@ export async function getPreviewData(sheetId: string) {
   }));
 
   const areas = collect<any>(areasRows, areaSchema as any, 'areas').filter(
-    (a) => a.status === 'published' || a.status === 'draft',
+    (a) => a.status === 'published' || a.status === 'draft'
   );
   const items = collect<any>(parseAndClean(itemsCsv), itemSchema as any, 'items').filter(
-    (i) => i.status === 'published' || i.status === 'draft',
+    (i) => i.status === 'published' || i.status === 'draft'
   );
 
   return { areas, items, problems };

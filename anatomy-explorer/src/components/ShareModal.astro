@@ -10,7 +10,15 @@
     <header class="dialog-header">
       <h2 id="shareDialogTitle" class="dialog-title">Share Exercise</h2>
       <button type="button" class="btn-close" id="shareCloseBtn" aria-label="Close share dialog">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
           <line x1="18" y1="6" x2="6" y2="18"></line>
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
@@ -21,7 +29,8 @@
       <p id="shareItemName" class="share-item-name"></p>
 
       <div class="qr-container">
-        <canvas id="shareQrCanvas" class="qr-canvas" width="200" height="200" aria-label="QR Code"></canvas>
+        <canvas id="shareQrCanvas" class="qr-canvas" width="200" height="200" aria-label="QR Code"
+        ></canvas>
         <p class="qr-note">Scan with a smartphone camera to open on mobile.</p>
       </div>
 
@@ -30,7 +39,16 @@
         <div class="url-input-wrap">
           <input type="text" id="shareUrlInput" class="url-input" readonly />
           <button type="button" class="btn-copy" id="shareCopyBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-copy" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon-copy"
+              aria-hidden="true"
+            >
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
@@ -41,9 +59,18 @@
 
       <div class="share-actions">
         <button type="button" class="btn-print" id="sharePrintBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
             <polyline points="6 9 6 2 18 2 18 9"></polyline>
-            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
+            ></path>
             <rect x="6" y="14" width="12" height="8"></rect>
           </svg>
           <span>Print Handout</span>
@@ -51,7 +78,8 @@
       </div>
 
       <p class="share-privacy-note">
-        This link points to general physiotherapy handbook instructions. No patient records or health data are stored.
+        This link points to general physiotherapy handbook instructions. No patient records or
+        health data are stored.
       </p>
     </div>
   </div>
@@ -188,7 +216,8 @@
     box-sizing: border-box;
   }
 
-  .btn-copy, .btn-print {
+  .btn-copy,
+  .btn-print {
     font-family: var(--f-display);
     font-weight: 600;
     font-size: calc(14px * var(--scale));
@@ -213,7 +242,8 @@
     filter: brightness(1.1);
   }
 
-  .btn-copy svg, .btn-print svg {
+  .btn-copy svg,
+  .btn-print svg {
     width: 16px;
     height: 16px;
   }
@@ -304,7 +334,9 @@
     });
 
     // Custom event interface to open modal from any card or button
-    window.addEventListener('open-share-modal', (async (e: CustomEvent<{ name: string; url: string }>) => {
+    window.addEventListener('open-share-modal', (async (
+      e: CustomEvent<{ name: string; url: string }>
+    ) => {
       const { name, url } = e.detail || {};
       if (!url) return;
 

@@ -1,16 +1,60 @@
 {
   "name": "Physiotherapy Patient Library",
   "short_name": "Physio App",
-  "description": "Your prescribed stretches and exercises.",
+  "description": "Your prescribed stretches and exercises, organised by body area.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#F3F4F6",
   "theme_color": "#0ea5e9",
+  "categories": [
+    "health",
+    "medical",
+    "lifestyle"
+  ],
   "icons": [
     {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
       "src": "/favicon.svg",
-      "sizes": "192x192 512x512",
-      "type": "image/svg+xml"
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Find my body area",
+      "url": "/find-my-area/",
+      "description": "Start from the body map."
+    },
+    {
+      "name": "Stretching",
+      "url": "/stretching/",
+      "description": "All published stretch areas."
+    },
+    {
+      "name": "Exercises",
+      "url": "/exercise/",
+      "description": "All published exercise areas."
     }
   ]
 }

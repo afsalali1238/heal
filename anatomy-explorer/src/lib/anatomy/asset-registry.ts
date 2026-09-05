@@ -37,7 +37,7 @@ export const ASSET_REGISTRY: readonly AnatomyAssetMetadata[] = [
     compressed: false,
     status: 'approved',
     reviewed_by: 'Supervisor',
-    reviewed_date: '2026-08-27'
+    reviewed_date: '2026-08-27',
   },
   {
     asset_id: 'locator-fullbody-3d',
@@ -48,19 +48,41 @@ export const ASSET_REGISTRY: readonly AnatomyAssetMetadata[] = [
     license: 'Internal Web Distribution License',
     author_or_attribution: 'Anatomy Explorer 3D Geometry Project',
     compressed: true,
-    compressed_bytes: 83648,
+    /**
+     * Must equal the file's size in bytes — `check:assets` compares the two and
+     * fails the build on a mismatch. It was 83,648 here against a 66,180-byte
+     * file, which broke `prebuild` (and therefore `npm run build`) for anyone
+     * who had never run the optimisation pass that changed the GLB.
+     * `npm run images:render` and this number are the two places a regenerated
+     * asset has to be re-declared; both print the exact value to paste.
+     */
+    compressed_bytes: 66180,
     triangle_count: 2936,
     status: 'approved',
     reviewed_by: 'Supervisor',
-    reviewed_date: '2026-08-27'
+    reviewed_date: '2026-08-27',
   },
 ];
 
-export function getAssetForRegion(regionId: string, kind: AnatomyAssetMetadata['kind'] = 'regional'): AnatomyAssetMetadata | undefined {
-  return ASSET_REGISTRY.find((a) => (a.regionId === regionId || a.regionId === 'all') && a.kind === kind && a.status === 'approved');
+export function getAssetForRegion(
+  regionId: string,
+  kind: AnatomyAssetMetadata['kind'] = 'regional'
+): AnatomyAssetMetadata | undefined {
+  return ASSET_REGISTRY.find(
+    (a) =>
+      (a.regionId === regionId || a.regionId === 'all') &&
+      a.kind === kind &&
+      a.status === 'approved'
+  );
 }
 
 /** Draft assets may render only in surfaces that visibly disclose draft status. */
-export function getDraftPreviewAsset(regionId: string, kind: AnatomyAssetMetadata['kind']): AnatomyAssetMetadata | undefined {
-  return ASSET_REGISTRY.find((a) => (a.regionId === regionId || a.regionId === 'all') && a.kind === kind && a.status !== 'retired');
+export function getDraftPreviewAsset(
+  regionId: string,
+  kind: AnatomyAssetMetadata['kind']
+): AnatomyAssetMetadata | undefined {
+  return ASSET_REGISTRY.find(
+    (a) =>
+      (a.regionId === regionId || a.regionId === 'all') && a.kind === kind && a.status !== 'retired'
+  );
 }

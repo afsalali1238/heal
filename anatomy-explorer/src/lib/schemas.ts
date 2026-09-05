@@ -37,9 +37,17 @@ export const itemSchema = z
     name_ar: z.string().optional(),
     type: z
       .enum([
-        'range-of-motion', 'mobility', 'isometric', 'concentric',
-        'eccentric', 'isokinetic', 'stabilisation', 'activation',
-        'offloading', 'strengthening', 'functional',
+        'range-of-motion',
+        'mobility',
+        'isometric',
+        'concentric',
+        'eccentric',
+        'isokinetic',
+        'stabilisation',
+        'activation',
+        'offloading',
+        'strengthening',
+        'functional',
       ])
       .optional(),
     start_position_en: z.string().optional(),
@@ -60,7 +68,10 @@ export const itemSchema = z
     rest_seconds: z.number().int().optional(),
     each_side: z.boolean().optional(),
     frequency_en: z.string().optional(),
-    image_id: z.string().regex(/^[a-z0-9-]+$/).optional(),
+    image_id: z
+      .string()
+      .regex(/^[a-z0-9-]+$/)
+      .optional(),
     image_alt_en: z.string().optional(),
     image_alt_ar: z.string().optional(),
     image_status: z.enum(['pending', 'generated', 'approved']).optional(),
@@ -96,7 +107,6 @@ export const itemSchema = z
         path: ['dosage'],
       });
     }
-
   });
 
 /**
@@ -125,5 +135,9 @@ export const legalSchema = z.object({
    * every `null`.
    */
   approvedBy: z.string().nullable().default(null),
-  approvedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().default(null),
+  approvedDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .default(null),
 });

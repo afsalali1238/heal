@@ -1,7 +1,8 @@
 # Handoff — Unified Anatomy Explorer
 
-**Updated:** 2026-08-27  
-**State:** Strong unified product contract; substantial 2D/library foundation; not launch-ready.
+**Updated:** 2026-09-05  
+**State:** Builds, gates and CI are green in a clean environment; content, imagery and human sign-off are
+still the blockers. Improvement pass and its evidence: `docs/IMPROVEMENTS-2026-09-05.md`.
 
 ## Product
 
@@ -34,14 +35,34 @@ not yet have complete visual evidence or human approval.
 
 ## Immediate blockers
 
-1. Verify all `tsx` gates in a supported target runtime. Dependencies are installed, but Node 24.13.0
-   crashes before checker execution with `uv_os_get_passwd ENOMEM`.
-2. Obtain clinician input / sign-off for review metadata (`reviewed_by` and `reviewed_date`).
+Re-verified 2026-09-05. Items 1 and 6 below are **closed** in a Linux/Node 22 sandbox (all `tsx` gates
+run, `npm ci` works after the lockfile fix, the build completes and the route crawl is clean); the rest
+are open and are human, not technical.
+
+1. ~~Verify all `tsx` gates in a supported target runtime.~~ **Closed** — every gate, `astro check`, the
+   build and `crawl-routes` pass on Node 22.22.3. The old `uv_os_get_passwd ENOMEM` crash was the Node
+   24.13.0 sandbox, not the code.
+2. Obtain clinician input / sign-off for review metadata (`reviewed_by` and `reviewed_date`) — and now
+   also for the 19 drafted items and 8 education entries, which are `draft` by construction.
 3. Obtain clinician review for the draft safety rules in `RedFlags.astro`.
-4. Render and verify the implemented Three.js neck slice at 360px and desktop, including canvas,
-   loading, error, reduced-motion, keyboard, and non-WebGL fallback states.
+4. Render and verify the Three.js slice **and the new follow-along guide** at 360px and desktop —
+   canvas, loading, error, reduced-motion, keyboard, non-WebGL fallback. **No browser was available in
+   the build sandbox**, so no visual evidence packet exists for any of it. This is the biggest open gap.
 5. Obtain clinician/visual approval for region boundaries and orientation; keep all assets draft until then.
-6. Complete a successful build and rendered route crawl, including legal/preview isolation.
+6. ~~Complete a successful build and rendered route crawl, including legal/preview isolation.~~ **Closed.**
+7. **Partly closed:** 24 published rows still carry `image_status: approved` on a 1×1 placeholder file,
+   but no longer render an empty frame — every published row now has a movement figure derived from its
+   own reviewed sentence (`npm run images:movement`), animated on the exercise page and gated against the
+   sheet by `scripts/check-poses.ts`. What remains is the human half: a clinician photographing or
+   drawing the real demonstration, and `image_status` staying `approved` only when they say so. A
+   generated schematic is labelled as one everywhere; it is not a demonstration of technique.
+8. **New:** the image metadata is worse than "missing" on 16 rows. Their `image_alt_en` ends with _"This
+   is an extended description to satisfy the accessibility minimum length requirement."_ — padding written
+   to get past `validate.ts`'s 45-character floor, now read aloud to patients. Trimming the sentence is
+   not the fix: it drops the alt under the floor. Each one needs a real description of the position and
+   which joint should feel it. And the only two rows with an actual file (`ex-neck-01`, `str-neck-02`)
+   point at 354–387 KB generated test renders marked `approved` — the class the v1 pilot verdict rejected.
+   `check:images` names all of it; `IMAGES_STRICT=1` fails the build on the alt text and the stubs.
 
 The proposed implementation defaults and exact review copy for the eight human decisions are in
 `docs/LAUNCH-DECISION-PACK.md`. They enable preview work but do not constitute human approval.
@@ -59,6 +80,7 @@ Do not claim typecheck, build, compliance, anatomy, image, accessibility, browse
 passed unless they actually ran. The app folders are untracked; preserve them and avoid destructive
 git commands.
 
-Latest command truth: `npm ci` succeeded; `npm run typecheck` passed with 41 files and 0 errors;
-`npm run build` failed in `prebuild`; compliance, anatomy, image, asset, and route gates have not
-completed successfully in the current Node 24.13.0 environment.
+Latest command truth (2026-09-05, Linux / Node 22.22.3 / npm 10.9.8): `npm ci` ✓ · `npm run lint` ✓ ·
+`npm run typecheck` ✓ 56 files 0 errors · `npm run check:all` ✓ (compliance, anatomy, images, assets,
+16 tests) · `npx astro build` ✓ 33 routes · `npm run crawl` ✓. No browser QA: Playwright's Chromium
+cannot be downloaded in this sandbox.

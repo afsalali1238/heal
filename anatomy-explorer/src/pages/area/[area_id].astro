@@ -17,7 +17,7 @@
 import Base from '../../layouts/Base.astro';
 import BackLink from '../../components/BackLink.astro';
 import { getAreaChoices } from '../../data/anatomy/body-regions';
-import { SECTION_COPY, areaPath } from '../../lib/section';
+import { SECTION_COPY, areaPath, itemCountLabel } from '../../lib/section';
 
 export async function getStaticPaths() {
   const choices = await getAreaChoices();
@@ -33,6 +33,7 @@ const { choice } = Astro.props;
 <Base
   title={`${choice.name} | Physiotherapy`}
   description={`Stretching and exercise instructions for the ${choice.name.toLowerCase()}.`}
+  ogImage={`/social/area-${choice.areaId}.png`}
 >
   <BackLink href="/find-my-area/" label="Choose a different area" />
 
@@ -48,7 +49,14 @@ const { choice } = Astro.props;
         data-share-name={`${choice.name} Handbook`}
         aria-label="Share this body area"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
           <rect x="3" y="3" width="7" height="7"></rect>
           <rect x="14" y="3" width="7" height="7"></rect>
           <rect x="14" y="14" width="7" height="7"></rect>
@@ -58,110 +66,192 @@ const { choice } = Astro.props;
       </button>
     </div>
     <p class="lede">
-      Your physiotherapist may have given you one of these or both. Follow only
-      what they went through with you.
+      Your physiotherapist may have given you one of these or both. Follow only what they went
+      through with you.
     </p>
   </div>
 
   <div class="routes">
-    {choice.routes.map((route) => (
-      <a href={areaPath(route.section, route.areaId)} class="route">
-        <span class="route-head">
-          <span class="route-title">{SECTION_COPY[route.section].title}</span>
-          <span class="route-count">{route.count} {route.count === 1 ? SECTION_COPY[route.section].itemNoun : `${SECTION_COPY[route.section].itemNoun}s`}</span>
-        </span>
-        <span class="route-desc">
-          {route.section === 'stretching'
-            ? `Hold-and-release stretches for the ${choice.name.toLowerCase()}.`
-            : `Movement and strengthening work for the ${choice.name.toLowerCase()}.`}
-        </span>
-        <span class="route-go" aria-hidden="true">
-          Open
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-        </span>
-      </a>
-    ))}
+    {
+      choice.routes.map((route) => (
+        <a href={areaPath(route.section, route.areaId)} class="route">
+          <span class="route-head">
+            <span class="route-title">{SECTION_COPY[route.section].title}</span>
+            <span class="route-count">{itemCountLabel(route.section, route.count)}</span>
+          </span>
+          <span class="route-desc">
+            {route.section === 'stretching'
+              ? `Hold-and-release stretches for the ${choice.name.toLowerCase()}.`
+              : `Movement and strengthening work for the ${choice.name.toLowerCase()}.`}
+          </span>
+          <span class="route-go" aria-hidden="true">
+            Open
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </span>
+        </a>
+      ))
+    }
   </div>
 
   <p class="not-diagnosis">
-    Choosing an area here does not tell you what is causing your symptoms. It
-    only shows the instructions filed under that part of the body.
+    Choosing an area here does not tell you what is causing your symptoms. It only shows the
+    instructions filed under that part of the body.
   </p>
 </Base>
 
 <style>
-.hero { padding: 8px 0 22px; }
-.hero-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.btn-share-area {
-  font-family: var(--f-display);
-  font-weight: 600;
-  font-size: calc(13px * var(--scale));
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  padding: 6px 14px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  min-height: 44px;
-}
-.btn-share-area:hover { border-color: var(--brand); color: var(--brand); }
-.btn-share-area svg { width: 15px; height: 15px; }
+  .hero {
+    padding: 8px 0 22px;
+  }
+  .hero-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn-share-area {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(13px * var(--scale));
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 6px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    min-height: 44px;
+  }
+  .btn-share-area:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+  }
+  .btn-share-area svg {
+    width: 15px;
+    height: 15px;
+  }
 
-.crumb {
-  font-family: var(--f-display); font-weight: 600;
-  font-size: calc(11px * var(--scale)); letter-spacing: .14em;
-  text-transform: uppercase; color: var(--ink-3); margin: 0 0 8px;
-}
-.hero h1 {
-  font-family: var(--f-display); font-weight: 700;
-  font-size: calc(clamp(28px, 7.5vw, 40px) * var(--scale));
-  line-height: 1.08; letter-spacing: -.02em; margin: 0 0 10px; text-wrap: balance;
-}
-.lede { margin: 0; color: var(--ink-2); max-width: 56ch; font-size: calc(17px * var(--scale)); }
+  .crumb {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(11px * var(--scale));
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 8px;
+  }
+  .hero h1 {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: calc(clamp(28px, 7.5vw, 40px) * var(--scale));
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .lede {
+    margin: 0;
+    color: var(--ink-2);
+    max-width: 56ch;
+    font-size: calc(17px * var(--scale));
+  }
 
-.routes { display: grid; gap: 12px; }
-@media (min-width: 600px) { .routes { grid-template-columns: 1fr 1fr; } }
-.route {
-  display: grid; gap: 8px; align-content: start;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r, 14px);
-  padding: 20px 22px; min-height: 132px; text-decoration: none; color: inherit;
-  transition: border-color .12s ease;
-}
-.route:hover { border-color: var(--brand); }
-.route:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
-.route-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.route-title {
-  font-family: var(--f-display); font-weight: 700;
-  font-size: calc(21px * var(--scale)); letter-spacing: -.01em;
-}
-.route-count {
-  font-family: var(--f-mono); font-size: calc(12px * var(--scale));
-  color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.route-desc { color: var(--ink-2); font-size: calc(15.5px * var(--scale)); line-height: 1.45; }
-.route-go {
-  display: flex; align-items: center; gap: 7px; margin-top: auto; padding-top: 6px;
-  font-family: var(--f-display); font-weight: 600;
-  font-size: calc(14px * var(--scale)); color: var(--brand);
-}
-.route-go svg { width: 17px; height: 17px; }
+  .routes {
+    display: grid;
+    gap: 12px;
+  }
+  @media (min-width: 600px) {
+    .routes {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .route {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r, 14px);
+    padding: 20px 22px;
+    min-height: 132px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.12s ease;
+  }
+  .route:hover {
+    border-color: var(--brand);
+  }
+  .route:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .route-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .route-title {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: calc(21px * var(--scale));
+    letter-spacing: -0.01em;
+  }
+  .route-count {
+    font-family: var(--f-mono);
+    font-size: calc(12px * var(--scale));
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .route-desc {
+    color: var(--ink-2);
+    font-size: calc(15.5px * var(--scale));
+    line-height: 1.45;
+  }
+  .route-go {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: auto;
+    padding-top: 6px;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(14px * var(--scale));
+    color: var(--brand);
+  }
+  .route-go svg {
+    width: 17px;
+    height: 17px;
+  }
 
-.not-diagnosis {
-  margin: 24px 0 0; padding-top: 16px; border-top: 1px solid var(--line);
-  color: var(--ink-3); font-size: calc(14px * var(--scale));
-  line-height: 1.5; max-width: 58ch;
-}
+  .not-diagnosis {
+    margin: 24px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    color: var(--ink-3);
+    font-size: calc(14px * var(--scale));
+    line-height: 1.5;
+    max-width: 58ch;
+  }
 
-@media (prefers-reduced-motion: reduce) { .route { transition: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .route {
+      transition: none;
+    }
+  }
 </style>
 
 <script>

@@ -12,136 +12,343 @@
  * to reach it, which is why all three entrances sit at the same level.
  */
 import Base from '../layouts/Base.astro';
-import { getPublishedAreas } from '../lib/library';
+import RegionFigure from '../components/anatomy/RegionFigure.astro';
+import { getPublishedAreas, getPublishedItemCount } from '../lib/library';
 import { getAreaChoices } from '../data/anatomy/body-regions';
 import { SECTION_COPY, sectionPath } from '../lib/section';
 
+/**
+ * Counts are fetched here rather than inside the cards because every number on
+ * this page is a promise about what is behind the link: an area card that says
+ * "Neck" and lands on two instructions is fine, one that lands on zero is the
+ * dead end A-005 exists to prevent.
+ */
 const [stretching, exercise, areaChoices] = await Promise.all([
-  getPublishedAreas('stretching'),
-  getPublishedAreas('exercise'),
+  addCounts('stretching'),
+  addCounts('exercise'),
   getAreaChoices(),
 ]);
+
+async function addCounts(section: 'stretching' | 'exercise') {
+  const areas = await getPublishedAreas(section);
+  return Promise.all(
+    areas.map(async (area) => ({
+      ...area,
+      count: await getPublishedItemCount(section, area.area_id),
+    }))
+  );
+}
 
 const sections = [
   { key: 'stretching' as const, areas: stretching },
   { key: 'exercise' as const, areas: exercise },
 ];
+
+const stretchingCount = stretching.reduce((total, area) => total + area.count, 0);
+const exerciseCount = exercise.reduce((total, area) => total + area.count, 0);
 ---
 
 <Base
   title="Home Exercise Library"
   description="The stretches and exercises your physiotherapist prescribed, organised by body area."
 >
-  <div class="hero">
-    <p class="crumb">Physiotherapy</p>
-    <h1>Home Exercise Library</h1>
-    <p class="lede">
-      The stretches and exercises your physiotherapist went through with you.
-      Start with the body area they pointed to.
-    </p>
+  <div class="hero" data-enter>
+    <div class="hero-copy">
+      <p class="crumb">Physiotherapy</p>
+      <h1>Home Exercise Library</h1>
+      <p class="lede">
+        The stretches and exercises your physiotherapist went through with you. Start with the body
+        area they pointed to.
+      </p>
+      <p class="hero-meta">
+        {stretchingCount + exerciseCount} instructions across {areaChoices.length} body areas · no account,
+        no tracking, nothing stored about you
+      </p>
+    </div>
+    <div class="hero-art">
+      <img
+        src="/anatomy/illustrations/home-hero.webp"
+        alt=""
+        width="960"
+        height="540"
+        decoding="async"
+        fetchpriority="high"
+      />
+    </div>
   </div>
 
   <div class="choices entrances">
-    <a href="/find-my-area/" class="choice">
+    <a href="/find-my-area/" class="choice" data-enter="2">
       <span class="choice-head">
         <span class="choice-title">Find my body area</span>
         <span class="choice-count">
-          {areaChoices.length} {areaChoices.length === 1 ? 'area' : 'areas'}
+          {areaChoices.length}
+          {areaChoices.length === 1 ? 'area' : 'areas'}
         </span>
       </span>
       <span class="choice-desc">Pick from a body map or a plain list.</span>
     </a>
-    {sections.map(({ key, areas }) => (
-      <a href={sectionPath(key)} class="choice">
-        <span class="choice-head">
-          <span class="choice-title">{SECTION_COPY[key].title}</span>
-          <span class="choice-count">
-            {areas.length} {areas.length === 1 ? 'area' : 'areas'}
+    {
+      sections.map(({ key, areas }) => (
+        <a href={sectionPath(key)} class="choice" data-enter="3">
+          <span class="choice-head">
+            <span class="choice-title">{SECTION_COPY[key].title}</span>
+            <span class="choice-count">
+              {areas.length} {areas.length === 1 ? 'area' : 'areas'}
+            </span>
           </span>
-        </span>
-        <span class="choice-desc">{SECTION_COPY[key].lede}</span>
-        {areas.length > 0 && (
-          <span class="choice-areas">{areas.map((a) => a.name_en).join(' · ')}</span>
-        )}
-      </a>
-    ))}
+          <span class="choice-desc">{SECTION_COPY[key].lede}</span>
+          {areas.length > 0 && (
+            <span class="choice-figures" aria-hidden="true">
+              {areas.slice(0, 4).map((a) => (
+                <span class="choice-figure">
+                  <RegionFigure areaId={a.area_id} zoom />
+                  <b>{a.name_en}</b>
+                </span>
+              ))}
+            </span>
+          )}
+        </a>
+      ))
+    }
   </div>
 
   <div class="guide">
     <h2>How to use this library</h2>
     <ol>
-      <li><span class="dot">1</span><span><b>Find your area</b> — the body part your physiotherapist pointed to.</span></li>
-      <li><span class="dot">2</span><span><b>Follow the dosage</b> — the holds, repetitions and sets shown on each card.</span></li>
-      <li><span class="dot">3</span><span><b>Stop if it hurts</b> — sharp pain, dizziness or numbness means stop and contact the clinic.</span></li>
+      <li>
+        <span class="dot">1</span><span
+          ><b>Find your area</b> — the body part your physiotherapist pointed to.</span
+        >
+      </li>
+      <li>
+        <span class="dot">2</span><span
+          ><b>Follow the dosage</b> — the holds, repetitions and sets shown on each card.</span
+        >
+      </li>
+      <li>
+        <span class="dot">3</span><span
+          ><b>Stop if it hurts</b> — sharp pain, dizziness or numbness means stop and contact the clinic.</span
+        >
+      </li>
     </ol>
   </div>
 </Base>
 
 <style>
-.hero { padding: 26px 0 4px; }
-.crumb {
-  font-family: var(--f-display); font-weight: 600;
-  font-size: calc(11px * var(--scale)); letter-spacing: .14em;
-  text-transform: uppercase; color: var(--ink-3); margin: 0 0 8px;
-}
-.hero h1 {
-  font-family: var(--f-display); font-weight: 700;
-  font-size: calc(clamp(28px, 7.5vw, 40px) * var(--scale));
-  line-height: 1.08; letter-spacing: -.02em; margin: 0 0 10px; text-wrap: balance;
-}
-.lede { margin: 0; color: var(--ink-2); max-width: 56ch; font-size: calc(17px * var(--scale)); }
+  .hero {
+    padding: 26px 0 4px;
+  }
+  .crumb {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(11px * var(--scale));
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 8px;
+  }
+  .hero h1 {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: calc(clamp(28px, 7.5vw, 40px) * var(--scale));
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .lede {
+    margin: 0;
+    color: var(--ink-2);
+    max-width: 56ch;
+    font-size: calc(17px * var(--scale));
+  }
+  .hero {
+    display: grid;
+    gap: 18px;
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .hero {
+      grid-template-columns: 1.05fr 0.95fr;
+    }
+  }
+  .hero-copy {
+    min-width: 0;
+  }
+  .hero-meta {
+    margin: 12px 0 0;
+    font-family: var(--f-mono);
+    font-size: calc(12px * var(--scale));
+    color: var(--ink-3);
+    letter-spacing: 0.01em;
+  }
+  .hero-art {
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    block-size: clamp(150px, 34vw, 230px);
+  }
+  .hero-art img {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
 
-/* sections */
-.choices { display: grid; gap: 12px; margin-top: 26px; }
-@media (min-width: 720px) { .entrances { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.choice {
-  display: grid; gap: 7px; align-content: start;
-  text-decoration: none; color: inherit;
-  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r, 14px);
-  padding: 20px 22px; min-height: 120px;
-  transition: border-color .12s ease;
-}
-.choice:hover { border-color: var(--line-2); }
-.choice:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
-.choice-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; }
-.choice-title {
-  font-family: var(--f-display); font-weight: 700;
-  font-size: calc(21px * var(--scale)); letter-spacing: -.01em;
-}
-.choice-count {
-  font-family: var(--f-mono); font-size: calc(12px * var(--scale));
-  color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; flex: none;
-}
-.choice-desc { color: var(--ink-2); font-size: calc(15.5px * var(--scale)); line-height: 1.45; }
-.choice-areas {
-  color: var(--ink-3); font-size: calc(13px * var(--scale)); line-height: 1.5;
-  padding-top: 6px; border-top: 1px solid var(--line);
-}
+  /* mini figures inside the section entrances */
+  .choice-figures {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+  .choice-figure {
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    inline-size: 34px;
+    opacity: 0.9;
+    transition: transform var(--dur-2, 220ms) var(--ease-out, ease-out);
+  }
+  .choice-figure :global(.figure) {
+    block-size: 46px;
+  }
+  .choice-figure b {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(9.5px * var(--scale));
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-inline-size: 100%;
+  }
+  .choice:hover .choice-figure {
+    transform: translateY(-2px);
+  }
 
-/* guidance */
-.guide {
-  margin: 26px 0 0; background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--r, 14px); padding: 18px 20px;
-}
-.guide h2 {
-  font-family: var(--f-display); font-weight: 600;
-  font-size: calc(11.5px * var(--scale)); letter-spacing: .14em;
-  text-transform: uppercase; color: var(--ink-3); margin: 0 0 12px;
-}
-.guide ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
-.guide li {
-  display: grid; grid-template-columns: auto 1fr; gap: 11px; align-items: start;
-  font-size: calc(15.5px * var(--scale)); color: var(--ink-2);
-}
-.guide li b { color: var(--ink); font-weight: 600; }
-.dot {
-  width: 19px; height: 19px; border-radius: 6px; margin-top: 3px;
-  background: var(--strengthen-bg); color: var(--strengthen);
-  display: grid; place-items: center;
-  font-size: calc(11px * var(--scale)); font-weight: 700;
-}
+  /* sections */
+  .choices {
+    display: grid;
+    gap: 12px;
+    margin-top: 26px;
+  }
+  @media (min-width: 720px) {
+    .entrances {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+  .choice {
+    display: grid;
+    gap: 7px;
+    align-content: start;
+    text-decoration: none;
+    color: inherit;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r, 14px);
+    padding: 20px 22px;
+    min-height: 120px;
+    transition: border-color 0.12s ease;
+  }
+  .choice:hover {
+    border-color: var(--line-2);
+  }
+  .choice:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .choice-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+  }
+  .choice-title {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: calc(21px * var(--scale));
+    letter-spacing: -0.01em;
+  }
+  .choice-count {
+    font-family: var(--f-mono);
+    font-size: calc(12px * var(--scale));
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    flex: none;
+  }
+  .choice-desc {
+    color: var(--ink-2);
+    font-size: calc(15.5px * var(--scale));
+    line-height: 1.45;
+  }
+  .choice-areas {
+    color: var(--ink-3);
+    font-size: calc(13px * var(--scale));
+    line-height: 1.5;
+    padding-top: 6px;
+    border-top: 1px solid var(--line);
+  }
 
-@media (prefers-reduced-motion: reduce) {
-  .choice { transition: none; }
-}
+  /* guidance */
+  .guide {
+    margin: 26px 0 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r, 14px);
+    padding: 18px 20px;
+  }
+  .guide h2 {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(11.5px * var(--scale));
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 12px;
+  }
+  .guide ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+  }
+  .guide li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 11px;
+    align-items: start;
+    font-size: calc(15.5px * var(--scale));
+    color: var(--ink-2);
+  }
+  .guide li b {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .dot {
+    width: 19px;
+    height: 19px;
+    border-radius: 6px;
+    margin-top: 3px;
+    background: var(--strengthen-bg);
+    color: var(--strengthen);
+    display: grid;
+    place-items: center;
+    font-size: calc(11px * var(--scale));
+    font-weight: 700;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .choice {
+      transition: none;
+    }
+  }
 </style>

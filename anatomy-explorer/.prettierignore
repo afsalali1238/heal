@@ -1,0 +1,20 @@
+# Generated content — synced from the clinician's Google Sheet, never formatted by hand.
+src/data/areas.json
+src/data/items.json
+
+# Historical and hand-off documents are read-only reference (see AGENTS.md). Their
+# tables and code fences are laid out deliberately; reflowing them is churn.
+docs/archive/
+_retired/
+*.md.orig
+
+# Machine state
+dist/
+.vercel/
+.astro/
+node_modules/
+build-artifacts/
+public/
+src/assets/images/
+reference/
+memory.md

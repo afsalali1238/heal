@@ -1,0 +1,333 @@
+---
+/**
+ * The movement figure, animated in the page.
+ *
+ * The same drawing as the standalone SVG and the same arithmetic from
+ * `lib/anatomy/movement`, in two transports: the file animates with CSS keyframes so
+ * a print, a screenshot and a browser with no JavaScript still show both states; the
+ * page animates with Web Animations so it can *stop* — while off screen, and while
+ * the patient is actually doing the movement.
+ *
+ * Stopping when the countdown starts is the point of that split. A looping
+ * demonstration is the only animation on an item page that carries information, and
+ * the moment the patient begins the rep it is competing with the thing they are
+ * doing. `DESIGN-SYSTEM.md`: nothing moves that does not say something.
+ *
+ * It is a schematic, and it says so on the page. Which joint moves and in which
+ * direction, drawn from the row's own reviewed sentence — never a range, a load or a
+ * speed, and never in place of a clinician's figure (see `lib/images.ts`: a real file
+ * always wins).
+ */
+import {
+  actorBonesFor,
+  arcFor,
+  boneTimeline,
+  fitFor,
+  floorFor,
+  frameAt,
+  planFor,
+  sceneFor,
+  supportsFor,
+} from '../../lib/anatomy/movement';
+
+interface Props {
+  /** The row's id. The plan is looked up from it, never passed in, so a figure and a row cannot be paired by hand. */
+  itemId: string;
+  /** Shown beside the figure. The caption is the row's sentence, quoted, not written here. */
+  name?: string;
+  /** Inside the movement guide: no caption, no padding, fills the cell. */
+  compact?: boolean;
+}
+
+const { itemId, name, compact = false } = Astro.props;
+const plan = planFor(itemId);
+
+const COLOR = {
+  bone: '#5A6473',
+  /** Everything that is not the exercise, drawn so the eye goes past it. */
+  still: '#ADB5C2',
+  ghost: '#C9CFDA',
+  support: '#E2E5EB',
+  focus: 'rgba(240, 190, 110, 0.45)',
+  accent: '#1D4ED8',
+};
+
+let view = null;
+if (plan) {
+  const start = sceneFor(plan, frameAt(plan, 0));
+  const end = sceneFor(plan, frameAt(plan, 1));
+  const fit = fitFor([start, end], { x: 10, y: 10, w: 400, h: 470 });
+  const floorY = floorFor([start, end]);
+  // The rotation origin of every bone is the joint it hangs from, resolved here
+  // rather than scraped back out of a path string in the browser.
+  const origins = new Map<string, [number, number]>();
+  for (const bone of start.bones) {
+    if (bone.d) {
+      const m = /^M(-?[\d.]+) (-?[\d.]+)/.exec(bone.d);
+      if (m) origins.set(bone.name, [Number(m[1]), Number(m[2])]);
+    }
+  }
+  const moving = boneTimeline(plan);
+  const actors = actorBonesFor(plan);
+  view = {
+    start,
+    fit,
+    supports: supportsFor(plan, start, floorY),
+    arc: arcFor(plan),
+    focus: start.focus,
+    bones: start.bones.map((bone) => ({
+      ...bone,
+      origin: origins.get(bone.name),
+      animate: moving.has(bone.name),
+      actor: actors.has(bone.name),
+    })),
+    caption: plan.from.move ?? '',
+    note: plan.note ?? '',
+    hasMotion: moving.size > 0,
+  };
+}
+---
+
+{
+  view ? (
+    <div class:list={['mvfig', { 'mvfig--compact': compact }]} data-figure data-item={itemId}>
+      <svg
+        viewBox="0 0 420 490"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <g transform={view.fit.transform}>
+          {view.supports.map((line) => (
+            <path
+              d={line.d}
+              stroke={COLOR.support}
+              stroke-width={line.width}
+              stroke-linecap="round"
+              fill="none"
+            />
+          ))}
+          <g class="ghost">
+            {view.start.bones.map((bone) =>
+              bone.circle ? (
+                <circle
+                  cx={bone.circle.cx}
+                  cy={bone.circle.cy}
+                  r={bone.circle.r}
+                  fill={COLOR.ghost}
+                />
+              ) : (
+                <path
+                  d={bone.d}
+                  stroke={COLOR.ghost}
+                  stroke-width={bone.width}
+                  stroke-linecap="round"
+                  fill="none"
+                />
+              )
+            )}
+          </g>
+          <g class="arc">
+            <path
+              d={view.arc.d}
+              stroke={COLOR.accent}
+              stroke-width="3"
+              stroke-dasharray="7 6"
+              fill="none"
+            />
+            <path
+              d={view.arc.head}
+              stroke={COLOR.accent}
+              stroke-width="3"
+              stroke-linecap="round"
+              fill="none"
+            />
+          </g>
+          {view.focus.map((point) => (
+            <circle cx={point[0]} cy={point[1]} r="21" fill={COLOR.focus} />
+          ))}
+          <g class="live">
+            {view.bones.map((bone) =>
+              bone.circle ? (
+                <circle
+                  cx={bone.circle.cx}
+                  cy={bone.circle.cy}
+                  r={bone.circle.r}
+                  fill={bone.actor ? COLOR.bone : COLOR.still}
+                  data-bone={bone.animate ? bone.name : undefined}
+                  style={
+                    bone.origin && bone.animate
+                      ? `transform-origin:${bone.origin[0]}px ${bone.origin[1]}px;transform-box:view-box`
+                      : undefined
+                  }
+                />
+              ) : (
+                <path
+                  d={bone.d}
+                  stroke={bone.actor ? COLOR.bone : COLOR.still}
+                  stroke-width={bone.width}
+                  stroke-linecap="round"
+                  fill="none"
+                  data-bone={bone.animate ? bone.name : undefined}
+                  style={
+                    bone.origin && bone.animate
+                      ? `transform-origin:${bone.origin[0]}px ${bone.origin[1]}px;transform-box:view-box`
+                      : undefined
+                  }
+                />
+              )
+            )}
+          </g>
+        </g>
+      </svg>
+      {!compact && (
+        <p class="cap">
+          {name ? <strong>{name}</strong> : null}
+          <span>{view.caption}</span>
+          {view.note ? <em>{view.note}</em> : null}
+          <small>Schematic drawn from the words above — not a photograph</small>
+        </p>
+      )}
+    </div>
+  ) : null
+}
+
+<script>
+  import { CYCLE_SECONDS, boneTimeline, planFor } from '../../lib/anatomy/movement';
+
+  /**
+   * The figure is legible without any of this: the faded pose is where the movement
+   * starts, the solid outline and dashed arc are where it ends. This only adds the
+   * travel between them, and takes it away when it should not be running.
+   */
+  function boot(): void {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (reduced.matches) return;
+
+    for (const root of document.querySelectorAll<HTMLElement>('[data-figure][data-item]')) {
+      const plan = planFor(String(root.dataset.item));
+      if (!plan) continue;
+
+      const animations: Animation[] = [];
+      for (const [bone, stops] of boneTimeline(plan)) {
+        const el = root.querySelector<SVGGraphicsElement>(`[data-bone="${bone}"]`);
+        if (!el || typeof el.animate !== 'function') continue;
+        const keyframes = stops.map((stop) => ({
+          transform: `translate(${stop.slide[0]}px, ${stop.slide[1]}px) rotate(${stop.deg}deg)`,
+          offset: Math.min(1, Math.max(0, stop.t / 100)),
+        }));
+        const animation = el.animate(keyframes, {
+          duration: CYCLE_SECONDS * 1000,
+          iterations: Infinity,
+          easing: 'linear',
+          fill: 'both',
+        });
+        // Paused until the observer says it is on screen: a page of item figures
+        // should not spend a low-end phone's frames on a drawing nobody is looking at.
+        animation.pause();
+        animations.push(animation);
+      }
+      if (animations.length === 0) continue;
+
+      let onScreen = false;
+      let busy = false;
+      const sync = () => {
+        for (const animation of animations) {
+          if (onScreen && !busy) animation.play();
+          else animation.pause();
+        }
+      };
+
+      new IntersectionObserver(
+        (entries) => {
+          onScreen = entries.some((entry) => entry.isIntersecting);
+          sync();
+        },
+        { threshold: 0.3 }
+      ).observe(root);
+
+      // The guide marks itself busy while a hold is counting down.
+      const guide = root.closest<HTMLElement>('[data-mguide]');
+      if (guide) {
+        const read = () => {
+          const running = guide.dataset.figurePaused === 'true';
+          if (running === busy) return;
+          busy = running;
+          sync();
+        };
+        new MutationObserver(read).observe(guide, {
+          attributes: true,
+          attributeFilter: ['data-figure-paused'],
+        });
+        read();
+      }
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot, { once: true });
+  } else {
+    boot();
+  }
+</script>
+
+<style>
+  .mvfig {
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    inline-size: 100%;
+  }
+
+  .mvfig svg {
+    inline-size: 100%;
+    max-inline-size: 250px;
+    block-size: auto;
+    display: block;
+  }
+
+  .mvfig--compact svg {
+    max-inline-size: 100%;
+    max-block-size: 250px;
+  }
+
+  .mvfig .arc {
+    opacity: 0.9;
+  }
+
+  .mvfig .ghost {
+    opacity: 0.7;
+  }
+
+  .cap {
+    margin: 0;
+    display: grid;
+    gap: 3px;
+    text-align: center;
+    max-inline-size: 48ch;
+    font-size: calc(var(--fs-meta) * var(--scale));
+    color: var(--ink-2);
+  }
+
+  .cap strong {
+    font-family: var(--f-display);
+    color: var(--ink);
+  }
+
+  .cap em {
+    color: var(--ink-3);
+    font-style: normal;
+  }
+
+  .cap small {
+    font-size: calc(var(--fs-micro) * var(--scale));
+    color: var(--ink-3);
+  }
+
+  /* The animation is the travel, not the information: paper gets both states. */
+  @media print {
+    .mvfig .live {
+      display: none;
+    }
+  }
+</style>

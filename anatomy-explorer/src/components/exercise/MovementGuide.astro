@@ -1,0 +1,793 @@
+---
+/**
+ * The follow-along guide — one per item, on the area page.
+ *
+ * ── The problem it solves ──────────────────────────────────────────────────
+ * A card on this site gives a patient four prose fields and three numbers. On
+ * the mat, mid-stretch, one-handed, with an older pair of eyes, that is a lot:
+ * people lose their place, forget whether this was the second or the third hold,
+ * and time the stretch by feel — usually short. Every one of those is a
+ * adherence problem wearing the clothes of a design problem.
+ *
+ * The guide re-orders the *same reviewed content* into a step machine with a
+ * countdown and a counter. It does not add a single instruction.
+ *
+ * ── The rule that keeps it honest ──────────────────────────────────────────
+ * **Only a number the clinician wrote down is ever timed.** A step auto-counts
+ * if and only if it came from `hold_seconds`. Everything else waits for the
+ * patient to press Next, because a reading pace is not a dosage and the app has
+ * no authority to invent one. That is also why there is no auto-play on load:
+ * nothing on a clinical page should start moving before someone asks.
+ *
+ * ── Progressive enhancement, same contract as everywhere else ──────────────
+ * Server-rendered, the panel is a numbered list of steps with the dosage figures
+ * beside them — complete, readable, printable. The script adds navigation,
+ * countdown and counting. No JS, no Web Animations, reduced motion: the list is
+ * the product, the machine on top is the upgrade.
+ *
+ * Nothing here is stored. No localStorage, no sessionStorage, no history
+ * rewrite — counts are for one rep at one sink, and when the page closes they
+ * are gone. D-007 is not just about analytics; a record of what a patient
+ * managed to do today is health data, and this app does not keep health data.
+ */
+import MovementFigure from './MovementFigure.astro';
+import RegionFigure from '../anatomy/RegionFigure.astro';
+import { planFor } from '../../lib/anatomy/movement';
+import { pickFigure } from '../../lib/images';
+import { glyphForType } from '../../lib/anatomy/figures';
+
+interface GuideStep {
+  readonly key: string;
+  readonly label: string;
+  readonly text: string;
+  /** Seconds, and only ever from `hold_seconds`. */
+  readonly seconds?: number;
+}
+
+interface Props {
+  item: {
+    id: string;
+    name_en: string;
+    area_id: string;
+    type?: string;
+    start_position_en?: string;
+    movement_en?: string;
+    direction_en?: string;
+    return_en?: string;
+    hold_seconds?: number;
+    reps?: number;
+    sets?: number;
+    rest_seconds?: number;
+    each_side?: boolean;
+    /** Only to decide whether a real picture exists; the guide never draws one. */
+    image_id?: string;
+  };
+}
+
+const { item } = Astro.props;
+
+const steps: GuideStep[] = [];
+if (item.start_position_en)
+  steps.push({ key: 'start', label: 'Start', text: item.start_position_en });
+if (item.movement_en) steps.push({ key: 'move', label: 'Move', text: item.movement_en });
+if (item.direction_en)
+  steps.push({ key: 'direction', label: 'Direction', text: item.direction_en });
+if (item.hold_seconds)
+  steps.push({
+    key: 'hold',
+    label: 'Hold',
+    text: `Hold for ${item.hold_seconds} seconds, then let go slowly.`,
+    seconds: item.hold_seconds,
+  });
+if (item.return_en) steps.push({ key: 'return', label: 'Return', text: item.return_en });
+if (item.each_side)
+  steps.push({
+    key: 'other-side',
+    label: 'Other side',
+    text: 'Repeat the same steps on the other side.',
+  });
+
+const sets = item.sets ?? 1;
+const reps = item.reps ?? 0;
+const hasCountdown = steps.some((s) => s.seconds);
+const hasCounting = reps > 0 || sets > 1 || Boolean(item.each_side);
+const glyph = glyphForType(item.type);
+
+/**
+ * Whether this row has a movement schematic to show. `lib/images` decides the same
+ * way the picture beside it does, so the guide and the card can never disagree about
+ * whether a real photograph has arrived.
+ */
+const hasSchematic =
+  planFor(item.id) !== null &&
+  (item.image_id ? (await pickFigure(item.image_id))?.kind === 'schematic' : false);
+
+// A short id so the live region, the list and the buttons can reference each
+// other without assuming there is only one guide on the page.
+const uid = item.id.replace(/[^a-z0-9-]/gi, '');
+---
+
+<div
+  class="mguide"
+  data-guide
+  data-mguide
+  data-figure-paused="false"
+  data-steps={steps.length}
+  data-hold={item.hold_seconds ?? ''}
+  data-reps={reps || ''}
+  data-sets={sets}
+  data-rest={item.rest_seconds ?? ''}
+>
+  <div class="mguide-head">
+    <h4 class="mguide-title" id={`guide-${uid}-title`}>Follow along</h4>
+    <p class="mguide-stepcount" data-counter>
+      <span data-step-now>1</span>
+      <span aria-hidden="true">/</span>
+      {steps.length}
+      {
+        hasCounting && (
+          <span class="mguide-sets">
+            · set <b data-set-now>1</b> of {sets}
+            {reps > 0 && (
+              <>
+                <span>
+                  {' '}
+                  · rep <b data-rep-now>0</b> of {reps}
+                </span>
+              </>
+            )}
+          </span>
+        )
+      }
+    </p>
+  </div>
+
+  <div class="progress-rail" aria-hidden="true">
+    <i data-rail-fill></i>
+  </div>
+
+  <p class="sr-only" data-announce role="status" aria-live="polite"></p>
+
+  <div class="mguide-grid">
+    <div class="mguide-figure" data-figure>
+      {
+        hasSchematic ? (
+          <MovementFigure itemId={item.id} compact />
+        ) : (
+          <RegionFigure areaId={item.area_id} glyph={glyph} animated={false} zoom />
+        )
+      }
+    </div>
+
+    {
+      hasCountdown && (
+        <div class="mguide-timer" data-timer hidden>
+          <svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+            <circle class="ring-track" cx="50" cy="50" r="42" />
+            <circle
+              class="ring-fill"
+              cx="50"
+              cy="50"
+              r="42"
+              pathLength={100}
+              style="--ring-len: 100"
+            />
+          </svg>
+          <p class="mguide-count" data-clock aria-hidden="true">
+            00:00
+          </p>
+          <p class="sr-only" data-clock-text role="status" />
+        </div>
+      )
+    }
+
+    <ol class="mguide-steps" id={`guide-${uid}-steps`}>
+      {
+        steps.map((step, index) => (
+          <li class:list={['mguide-step', { 'is-current': index === 0 }]} data-step={index}>
+            <span class="mguide-step-label">{step.label}</span>
+            <span class="mguide-step-text">{step.text}</span>
+            {step.seconds && (
+              <span class="mguide-step-seconds">
+                {step.seconds}
+                <small>s</small>
+              </span>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  <div class="mguide-controls" role="group" aria-label={`Guide controls for ${item.name_en}`}>
+    <button type="button" class="gc" data-prev disabled aria-label="Previous step">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"><path d="M19 12H5M11 18l-6-6 6-6"></path></svg
+      >
+    </button>
+
+    {
+      hasCountdown && (
+        <button type="button" class="gc gc-primary" data-run>
+          <span data-run-label>Start the hold</span>
+        </button>
+      )
+    }
+
+    {
+      reps > 0 && (
+        <button type="button" class="gc" data-rep-done>
+          Rep done
+          <b data-rep-bubble>0</b>
+          <span class="sr-only"> of {reps}</span>
+        </button>
+      )
+    }
+
+    <button type="button" class="gc" data-reset>Reset</button>
+
+    <button type="button" class="gc gc-icon" data-next aria-label="Next step">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg
+      >
+    </button>
+  </div>
+
+  <p class="mguide-note">
+    Only the hold is timed, and only with the seconds your physiotherapist set. Everything else
+    waits for you. Counting is for this visit and is not saved.
+  </p>
+</div>
+
+<script>
+  /**
+   * One instance per `[data-guide]`. No framework, no router, no storage: a
+   * step index, a rep count, one interval, and a repaint.
+   */
+  document.querySelectorAll<HTMLElement>('[data-guide]').forEach(initGuide);
+
+  function initGuide(root: HTMLElement): void {
+    const steps = Array.from(root.querySelectorAll<HTMLElement>('[data-step]'));
+    if (steps.length === 0) return;
+
+    const total = steps.length;
+    const reps = Number(root.dataset.reps || 0);
+    const sets = Number(root.dataset.sets || 1);
+    const rest = Number(root.dataset.rest || 0);
+
+    const stepNow = root.querySelector<HTMLElement>('[data-step-now]');
+    const setNow = root.querySelector<HTMLElement>('[data-set-now]');
+    const repNow = root.querySelector<HTMLElement>('[data-rep-now]');
+    const repBubble = root.querySelector<HTMLElement>('[data-rep-bubble]');
+    const timer = root.querySelector<HTMLElement>('[data-timer]');
+    const clock = root.querySelector<HTMLElement>('[data-clock]');
+    const ring = root.querySelector<HTMLElement>('.ring-fill');
+    const figure = root.querySelector<HTMLElement>('[data-figure]');
+    const rail = root.querySelector<HTMLElement>('[data-rail-fill]');
+    const live = root.querySelector<HTMLElement>('[data-announce]');
+    const runBtn = root.querySelector<HTMLButtonElement>('[data-run]');
+    const runLabel = root.querySelector<HTMLElement>('[data-run-label]');
+    const prevBtn = root.querySelector<HTMLButtonElement>('[data-prev]');
+    const nextBtn = root.querySelector<HTMLButtonElement>('[data-next]');
+    const resetBtn = root.querySelector<HTMLButtonElement>('[data-reset]');
+    const repBtn = root.querySelector<HTMLButtonElement>('[data-rep-done]');
+
+    const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    let index = 0;
+    let rep = 0;
+    let set = 1;
+    let remaining = 0;
+    let tick: number | undefined;
+    let restTick: number | undefined;
+
+    /** Prescribed seconds for the current step, read back from the markup. */
+    const secondsOf = (el: HTMLElement | undefined): number => {
+      const raw = el?.querySelector<HTMLElement>('.mguide-step-seconds')?.textContent ?? '';
+      const n = Number(raw.replace(/[^0-9.]/g, ''));
+      return Number.isFinite(n) ? n : 0;
+    };
+
+    const fmt = (value: number): string => {
+      const whole = Math.max(0, Math.ceil(value));
+      const m = Math.floor(whole / 60);
+      const s = whole % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    };
+
+    /**
+     * Announce in words what the compact counter says in figures. The visible
+     * header stays "3 / 5 · set 1 of 2"; a screen-reader user gets the sentence.
+     */
+    function say(message: string): void {
+      if (live) live.textContent = message;
+    }
+
+    function paint(): void {
+      steps.forEach((el, i) => {
+        const current = i === index;
+        el.classList.toggle('is-current', current);
+        el.setAttribute('aria-current', current ? 'step' : 'false');
+      });
+      if (stepNow) stepNow.textContent = String(index + 1);
+      if (setNow) setNow.textContent = String(set);
+      if (repNow) repNow.textContent = String(rep);
+      if (repBubble) repBubble.textContent = String(rep);
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (nextBtn) nextBtn.disabled = index === total - 1;
+
+      const seconds = secondsOf(steps[index]);
+      const counting = tick !== undefined;
+      if (timer) timer.hidden = seconds <= 0 && restTick === undefined;
+      if (ring) {
+        const done =
+          seconds > 0 ? (remaining > 0 ? (seconds - remaining) / seconds : 1) : restDone();
+        ring.style.setProperty('--p', String(clamp01(done)));
+      }
+      if (clock) clock.textContent = fmt(restTick !== undefined ? restRemaining : remaining);
+      if (figure) figure.toggleAttribute('data-animate-glyph', counting);
+      paintRail();
+    }
+
+    const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+
+    /** Rail under the head: reps within a set, sets across the whole item. */
+    function paintRail(): void {
+      if (!rail) return;
+      const perSet = reps > 0 ? reps : Math.max(1, total - 1);
+      const doneInSet = reps > 0 ? rep : index;
+      rail.style.setProperty(
+        '--p',
+        String(clamp01(((set - 1) * perSet + doneInSet) / (sets * perSet)))
+      );
+    }
+
+    /**
+     * The looping figure is there to explain the movement. While a hold is counting
+     * down the patient is doing it, so the picture stops — a drawing that keeps
+     * waving during the rep competes with the thing it describes.
+     */
+    function setPaused(paused: boolean): void {
+      root.setAttribute('data-figure-paused', paused ? 'true' : 'false');
+    }
+
+    function stopHold(): void {
+      if (tick !== undefined) window.clearInterval(tick);
+      tick = undefined;
+      setPaused(false);
+      if (runLabel) runLabel.textContent = remaining > 0 ? 'Resume the hold' : 'Start the hold';
+      if (figure) figure.removeAttribute('data-animate-glyph');
+    }
+
+    function stopRest(): void {
+      if (restTick !== undefined) window.clearInterval(restTick);
+      restTick = undefined;
+    }
+
+    function go(next: number, message?: string): void {
+      index = Math.min(total - 1, Math.max(0, next));
+      stopHold();
+      remaining = secondsOf(steps[index]);
+      paint();
+      const label =
+        steps[index]?.querySelector('.mguide-step-label')?.textContent?.trim() ?? 'Step';
+      say(message ?? `Step ${index + 1} of ${total}. ${label}.`);
+    }
+
+    function startHold(): void {
+      const seconds = secondsOf(steps[index]);
+      if (seconds <= 0) {
+        say('This step is not timed. Press Next when you are ready.');
+        return;
+      }
+      if (tick !== undefined) {
+        stopHold();
+        paint();
+        say('Paused.');
+        return;
+      }
+      const from = remaining > 0 ? remaining : seconds;
+      const at = Date.now();
+      if (runLabel) runLabel.textContent = 'Pause';
+      setPaused(true);
+      tick = window.setInterval(() => {
+        remaining = from - (Date.now() - at) / 1000;
+        if (remaining <= 0) {
+          remaining = 0;
+          finishHold();
+          return;
+        }
+        paint();
+      }, 100);
+      paint();
+      say(`Counting down from ${seconds} seconds.`);
+    }
+
+    function finishHold(): void {
+      stopHold();
+      remaining = 0;
+      paint();
+      say('Hold complete. Return slowly.');
+      flash();
+      if (index < total - 1) go(index + 1, 'Hold complete. Next step: return.');
+      if (reps > 0) countRep('hold');
+    }
+
+    /** Rest between sets, counted only when the clinician recorded one. */
+    let restRemaining = 0;
+    const restDone = () => (rest > 0 && restTick !== undefined ? 1 - restRemaining / rest : 0);
+
+    function startRest(): void {
+      if (rest <= 0 || restTick !== undefined) return;
+      restRemaining = rest;
+      const at = Date.now();
+      const from = rest;
+      restTick = window.setInterval(() => {
+        restRemaining = from - (Date.now() - at) / 1000;
+        if (restRemaining <= 0) {
+          stopRest();
+          restRemaining = 0;
+          say('Rest finished. Start the next set.');
+        }
+        paint();
+      }, 200);
+      say(`Rest for ${rest} seconds.`);
+      paint();
+    }
+
+    function countRep(origin: 'button' | 'hold'): void {
+      if (reps <= 0) return;
+      rep += 1;
+      if (rep >= reps) {
+        rep = 0;
+        if (set < sets) {
+          set += 1;
+          say(`Set ${set - 1} of ${sets} complete. Starting set ${set}.`);
+          startRest();
+        } else {
+          say('Every set for this exercise is done. Stop here for today.');
+        }
+      } else {
+        say(
+          origin === 'hold'
+            ? `Rep ${rep} of ${reps}. Press the button for the next one.`
+            : `Rep ${rep} of ${reps}.`
+        );
+      }
+      go(0, undefined);
+      paint();
+    }
+
+    function flash(): void {
+      if (reduced() || typeof Element.prototype.animate !== 'function') return;
+      const el = root.querySelector<HTMLElement>('[data-figure]');
+      if (!el) return;
+      el.animate(
+        [{ transform: 'scale(1)' }, { transform: 'scale(1.035)' }, { transform: 'scale(1)' }],
+        { duration: 420, easing: 'cubic-bezier(.22,.61,.36,1)' }
+      );
+    }
+
+    prevBtn?.addEventListener('click', () => go(index - 1));
+    nextBtn?.addEventListener('click', () => go(index + 1));
+    runBtn?.addEventListener('click', startHold);
+    repBtn?.addEventListener('click', () => countRep('button'));
+    resetBtn?.addEventListener('click', () => {
+      stopHold();
+      stopRest();
+      rep = 0;
+      set = 1;
+      remaining = secondsOf(steps[0]);
+      index = 0;
+      paint();
+      say('Guide reset to the first step.');
+    });
+
+    // Arrow keys move through the steps while focus is inside the guide, so a
+    // patient on a mat with a keyboard or a remote is not hunting for buttons.
+    root.addEventListener('keydown', (event) => {
+      const e = event as KeyboardEvent;
+      if (e.target instanceof HTMLElement && e.target.closest('button')) return;
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        go(index + 1);
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        go(index - 1);
+      }
+    });
+
+    // Pause, never lose: a hidden tab should not burn a hold the patient missed.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && tick !== undefined) {
+        stopHold();
+        paint();
+        say('Paused while the page was in the background.');
+      }
+    });
+
+    remaining = secondsOf(steps[0]);
+    paint();
+  }
+</script>
+
+<style>
+  .mguide {
+    border: 1px solid var(--line);
+    border-radius: var(--r-inner, 11px);
+    background: var(--surface-2);
+    padding: 13px 15px 11px;
+    display: grid;
+    gap: 11px;
+  }
+
+  .mguide-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .mguide-title {
+    margin: 0;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(var(--fs-label) * var(--scale));
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .mguide-stepcount {
+    margin: 0;
+    font-family: var(--f-mono);
+    font-size: calc(var(--fs-label) * var(--scale));
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+  }
+  .mguide-stepcount b {
+    color: var(--ink);
+  }
+  .mguide-sets {
+    margin-inline-start: 4px;
+    color: var(--ink-3);
+  }
+
+  .mguide-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 13px;
+    align-items: start;
+  }
+  @media (min-width: 760px) {
+    .mguide-grid {
+      grid-template-columns: auto auto 1fr;
+    }
+  }
+
+  .mguide-figure {
+    inline-size: 74px;
+    block-size: 116px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    display: grid;
+    place-items: center;
+    padding: 4px;
+  }
+  .mguide-figure :global(.figure) {
+    block-size: 100%;
+  }
+
+  .mguide-timer {
+    position: relative;
+    inline-size: 96px;
+    block-size: 96px;
+    display: grid;
+    place-items: center;
+    justify-self: center;
+  }
+  .mguide-timer svg {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    transform: rotate(-90deg);
+  }
+  .ring-track {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 8;
+  }
+  .ring-fill {
+    fill: none;
+    stroke: var(--brand);
+    stroke-width: 8;
+    stroke-linecap: round;
+  }
+  .mguide-count {
+    margin: 0;
+    font-family: var(--f-mono);
+    font-weight: 600;
+    font-size: calc(19px * var(--scale));
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  .mguide-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+  }
+  .mguide-step {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 9px;
+    align-items: baseline;
+    padding: 7px 9px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    transition:
+      background-color var(--dur-1, 120ms) linear,
+      border-color var(--dur-1, 120ms) linear;
+  }
+  .mguide-step.is-current {
+    background: var(--surface);
+    border-color: var(--brand);
+  }
+  .mguide-step-label {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(var(--fs-micro) * var(--scale));
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    min-inline-size: 5.4ch;
+  }
+  .mguide-step.is-current .mguide-step-label {
+    color: var(--brand);
+  }
+  .mguide-step-text {
+    font-size: calc(var(--fs-small) * var(--scale));
+    color: var(--ink-2);
+    line-height: 1.45;
+  }
+  .mguide-step.is-current .mguide-step-text {
+    color: var(--ink);
+  }
+  .mguide-step-seconds {
+    font-family: var(--f-mono);
+    font-size: calc(var(--fs-label) * var(--scale));
+    color: var(--ink-3);
+    white-space: nowrap;
+  }
+  .mguide-step-seconds small {
+    font-size: 0.8em;
+  }
+
+  .mguide-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+  }
+  .gc {
+    min-block-size: 44px;
+    min-inline-size: 44px;
+    padding: 0 13px;
+    border-radius: 10px;
+    border: 1px solid var(--line-2);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(var(--fs-meta) * var(--scale));
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    transition:
+      transform var(--dur-1, 120ms) var(--ease-out, ease-out),
+      background-color var(--dur-1, 120ms) linear;
+  }
+  .gc svg {
+    inline-size: 17px;
+    block-size: 17px;
+  }
+  .gc:hover:not(:disabled) {
+    background: var(--surface-2);
+  }
+  .gc:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+  .gc:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .gc-primary {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-ink);
+  }
+  .gc-primary:hover {
+    background: var(--brand);
+    filter: brightness(0.95);
+  }
+  .gc-icon {
+    padding-inline: 9px;
+  }
+  .gc b {
+    font-family: var(--f-mono);
+    background: var(--mobility-bg);
+    color: var(--mobility);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: calc(var(--fs-label) * var(--scale));
+  }
+
+  .mguide-note {
+    margin: 0;
+    font-size: calc(var(--fs-label) * var(--scale));
+    color: var(--ink-3);
+    line-height: 1.45;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* Reduced motion: an equal presentation, not a slower one. base.css already
+     zeroes every duration globally, which would leave the ring snapping — so the
+     ring goes away entirely and the rail under the head becomes the progress
+     display, updated by the same per-second tick. The numbers never change. */
+  @media (prefers-reduced-motion: reduce) {
+    .mguide-timer svg {
+      display: none;
+    }
+    .mguide-timer {
+      background: transparent;
+    }
+    .progress-rail {
+      height: 7px;
+    }
+  }
+
+  @media print {
+    .mguide {
+      border-style: dashed;
+      background: #fff;
+    }
+    .mguide-controls,
+    .mguide-timer,
+    .mguide-note {
+      display: none;
+    }
+    .mguide-step {
+      border: none;
+      padding: 2px 0;
+    }
+  }
+</style>

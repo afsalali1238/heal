@@ -34,13 +34,17 @@ function countGlbTriangles(filePath: string): number {
   const jsonType = buffer.toString('ascii', 16, 20);
   if (jsonType !== 'JSON') throw new Error('first GLB chunk is not JSON');
   const gltf = JSON.parse(buffer.toString('utf8', 20, 20 + jsonLength));
-  return (gltf.meshes ?? []).reduce((total: number, mesh: any) => total +
-    (mesh.primitives ?? []).reduce((meshTotal: number, primitive: any) => {
-      if (primitive.mode !== undefined && primitive.mode !== 4) return meshTotal;
-      const accessorIndex = primitive.indices ?? primitive.attributes?.POSITION;
-      const count = gltf.accessors?.[accessorIndex]?.count ?? 0;
-      return meshTotal + Math.floor(count / 3);
-    }, 0), 0);
+  return (gltf.meshes ?? []).reduce(
+    (total: number, mesh: any) =>
+      total +
+      (mesh.primitives ?? []).reduce((meshTotal: number, primitive: any) => {
+        if (primitive.mode !== undefined && primitive.mode !== 4) return meshTotal;
+        const accessorIndex = primitive.indices ?? primitive.attributes?.POSITION;
+        const count = gltf.accessors?.[accessorIndex]?.count ?? 0;
+        return meshTotal + Math.floor(count / 3);
+      }, 0),
+    0
+  );
 }
 
 function readGlbNodeNames(filePath: string): string[] {
@@ -75,7 +79,7 @@ export interface MinimalItemRow {
 export function auditAssets(
   registry: readonly AnatomyAssetMetadata[],
   items: readonly MinimalItemRow[],
-  baseDir: string = process.cwd(),
+  baseDir: string = process.cwd()
 ): AssetAuditResult {
   const errors: string[] = [];
   const warnings: string[] = [];
@@ -94,37 +98,45 @@ export function auditAssets(
   for (const asset of registry) {
     // Duplicate ID check
     if (seenIds.has(asset.asset_id)) {
-      errors.push(`✗ Duplicate asset_id "${asset.asset_id}". Asset IDs must be permanent and unique.`);
+      errors.push(
+        `✗ Duplicate asset_id "${asset.asset_id}". Asset IDs must be permanent and unique.`
+      );
     }
     seenIds.add(asset.asset_id);
 
     // Required metadata fields
     if (!asset.license || !asset.source_url_or_provider || !asset.author_or_attribution) {
       errors.push(
-        `✗ Asset "${asset.asset_id}" is missing required licensing or attribution metadata (license, source_url_or_provider, author_or_attribution).`,
+        `✗ Asset "${asset.asset_id}" is missing required licensing or attribution metadata (license, source_url_or_provider, author_or_attribution).`
       );
     }
 
     // Review metadata requirement for approved assets
     if (asset.status === 'approved') {
       const hasReviewer = Boolean(asset.reviewed_by && asset.reviewed_by.trim().length > 0);
-      const hasDate = Boolean(asset.reviewed_date && /^\d{4}-\d{2}-\d{2}$/.test(asset.reviewed_date.trim()));
+      const hasDate = Boolean(
+        asset.reviewed_date && /^\d{4}-\d{2}-\d{2}$/.test(asset.reviewed_date.trim())
+      );
       if (!hasReviewer || !hasDate) {
         errors.push(
-          `✗ Asset "${asset.asset_id}" is status: "approved" but lacks genuine review metadata. Both "reviewed_by" and ISO "reviewed_date" (YYYY-MM-DD) are required before release.`,
+          `✗ Asset "${asset.asset_id}" is status: "approved" but lacks genuine review metadata. Both "reviewed_by" and ISO "reviewed_date" (YYYY-MM-DD) are required before release.`
         );
       }
     }
 
     // File existence & byte size check
     if (!asset.url.startsWith('/') || asset.url.includes('..')) {
-      errors.push(`✗ Asset "${asset.asset_id}" has an invalid public URL "${asset.url}". Must start with "/".`);
+      errors.push(
+        `✗ Asset "${asset.asset_id}" has an invalid public URL "${asset.url}". Must start with "/".`
+      );
       continue;
     }
 
     const filePath = path.join(baseDir, 'public', ...asset.url.slice(1).split('/'));
     if (!fs.existsSync(filePath)) {
-      errors.push(`✗ Asset "${asset.asset_id}" is registered but file is missing at "${asset.url}".`);
+      errors.push(
+        `✗ Asset "${asset.asset_id}" is registered but file is missing at "${asset.url}".`
+      );
       continue;
     }
 
@@ -142,12 +154,14 @@ export function auditAssets(
 
     if (asset.compressed_bytes !== undefined && asset.compressed_bytes !== actualBytes) {
       errors.push(
-        `✗ Asset "${asset.asset_id}" declares ${asset.compressed_bytes} compressed_bytes but actual file size is ${actualBytes} bytes.`,
+        `✗ Asset "${asset.asset_id}" declares ${asset.compressed_bytes} compressed_bytes but actual file size is ${actualBytes} bytes.`
       );
     }
 
     if (asset.triangle_count !== undefined && asset.triangle_count > MAX_TRIANGLES_BUDGET) {
-      errors.push(`✗ Asset "${asset.asset_id}" exceeds triangle budget (${asset.triangle_count} > ${MAX_TRIANGLES_BUDGET}).`);
+      errors.push(
+        `✗ Asset "${asset.asset_id}" exceeds triangle budget (${asset.triangle_count} > ${MAX_TRIANGLES_BUDGET}).`
+      );
     }
 
     // GLB 2.0 Container binary validation
@@ -166,20 +180,26 @@ export function auditAssets(
         const version = header.readUInt32LE(4);
         if (magic !== 'glTF' || version !== 2) {
           errors.push(
-            `✗ Asset "${asset.asset_id}" is not a valid GLB 2.0 container (magic="${magic}", version=${version}).`,
+            `✗ Asset "${asset.asset_id}" is not a valid GLB 2.0 container (magic="${magic}", version=${version}).`
           );
         }
       }
       try {
         const actualTriangles = countGlbTriangles(filePath);
         if (actualTriangles > MAX_TRIANGLES_BUDGET) {
-          errors.push(`✗ Asset "${asset.asset_id}" exceeds triangle budget (${actualTriangles} > ${MAX_TRIANGLES_BUDGET}).`);
+          errors.push(
+            `✗ Asset "${asset.asset_id}" exceeds triangle budget (${actualTriangles} > ${MAX_TRIANGLES_BUDGET}).`
+          );
         }
         if (asset.triangle_count !== undefined && asset.triangle_count !== actualTriangles) {
-          errors.push(`✗ Asset "${asset.asset_id}" declares ${asset.triangle_count} triangles but GLB contains ${actualTriangles}.`);
+          errors.push(
+            `✗ Asset "${asset.asset_id}" declares ${asset.triangle_count} triangles but GLB contains ${actualTriangles}.`
+          );
         }
       } catch (err) {
-        errors.push(`✗ Asset "${asset.asset_id}" triangle count could not be read: ${(err as Error).message}.`);
+        errors.push(
+          `✗ Asset "${asset.asset_id}" triangle count could not be read: ${(err as Error).message}.`
+        );
       }
     }
   }
@@ -187,7 +207,9 @@ export function auditAssets(
   // 3. Fallback asset check (Level 0 mandatory)
   const approvedFallback = registry.find((a) => a.kind === 'fallback' && a.status === 'approved');
   if (!approvedFallback) {
-    errors.push('✗ Missing approved 2D fallback map in ASSET_REGISTRY (Level 0 tier is mandatory before release).');
+    errors.push(
+      '✗ Missing approved 2D fallback map in ASSET_REGISTRY (Level 0 tier is mandatory before release).'
+    );
   }
 
   // 4. Audit Published 2D Image files
@@ -199,7 +221,7 @@ export function auditAssets(
         fs
           .readdirSync(imagesDir)
           .filter((f) => !f.startsWith('.'))
-          .map((f) => path.basename(f, path.extname(f))),
+          .map((f) => path.basename(f, path.extname(f)))
       );
     } catch (err) {
       warnings.push(`! Could not read image directory "${imagesDir}": ${(err as Error).message}`);
@@ -211,13 +233,17 @@ export function auditAssets(
 
   for (const imgId of requiredImages) {
     if (!availableImages.has(imgId)) {
-      errors.push(`✗ Published item references image "${imgId}", but no corresponding file exists in "src/assets/images".`);
+      errors.push(
+        `✗ Published item references image "${imgId}", but no corresponding file exists in "src/assets/images".`
+      );
     }
   }
 
   for (const imgId of availableImages) {
     if (!requiredImages.has(imgId)) {
-      warnings.push(`! Image file "${imgId}" exists in src/assets/images but is not referenced by any published item.`);
+      warnings.push(
+        `! Image file "${imgId}" exists in src/assets/images but is not referenced by any published item.`
+      );
     }
   }
 
@@ -226,11 +252,13 @@ export function auditAssets(
     const locatorPath = path.join(baseDir, 'public', ...locator.url.slice(1).split('/'));
     if (fs.existsSync(locatorPath)) {
       try {
-        errors.push(...validateModelRegionVisuals(
-          BODY_REGION_VISUALS,
-          readGlbNodeNames(locatorPath),
-          GEOMETRY_REGIONS.map((region) => region.id),
-        ).map((error) => `✗ ${error}`));
+        errors.push(
+          ...validateModelRegionVisuals(
+            BODY_REGION_VISUALS,
+            readGlbNodeNames(locatorPath),
+            GEOMETRY_REGIONS.map((region) => region.id)
+          ).map((error) => `✗ ${error}`)
+        );
       } catch (err) {
         errors.push(`✗ Locator mesh mapping could not be inspected: ${(err as Error).message}.`);
       }
@@ -276,7 +304,9 @@ function run(): void {
     process.exit(1);
   }
 
-  console.log('\n✓ check:assets passed: All visual assets and directories satisfy ASSET-PIPELINE.md standards.');
+  console.log(
+    '\n✓ check:assets passed: All visual assets and directories satisfy ASSET-PIPELINE.md standards.'
+  );
 }
 
 import { fileURLToPath } from 'node:url';

@@ -10,11 +10,12 @@ dotenv.config();
 
 const SHEET_ID = process.env.SHEET_ID;
 if (!SHEET_ID) {
-  console.error("SHEET_ID is missing from .env");
+  console.error('SHEET_ID is missing from .env');
   process.exit(1);
 }
 
-const getSheetUrl = (sheetName: string) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${sheetName}`;
+const getSheetUrl = (sheetName: string) =>
+  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${sheetName}`;
 
 async function fetchCsv(sheetName: string) {
   const url = getSheetUrl(sheetName);
@@ -53,35 +54,37 @@ function parseAndClean(csv: string) {
 }
 
 async function main() {
-  console.log("Fetching data from Google Sheets...");
+  console.log('Fetching data from Google Sheets...');
   let areasCsv = '';
   let itemsCsv = '';
-  
+
   try {
     areasCsv = await fetchCsv('areas');
     itemsCsv = await fetchCsv('items');
-  } catch(e: any) {
+  } catch (e: any) {
     console.error(e.message);
     process.exit(1);
   }
 
   if (!areasCsv.trim() && !itemsCsv.trim()) {
-    console.error("ERROR: The sheet appears to be completely empty.");
-    console.error("Please populate the 'areas' and 'items' tabs with the correct headers before running sync.");
+    console.error('ERROR: The sheet appears to be completely empty.');
+    console.error(
+      "Please populate the 'areas' and 'items' tabs with the correct headers before running sync."
+    );
     process.exit(1);
   }
 
   const areasData = parseAndClean(areasCsv);
   const itemsData = parseAndClean(itemsCsv);
-  
+
   // synthetic ID for areas required by Astro file loader
-  const preparedAreas = areasData.map(area => ({
+  const preparedAreas = areasData.map((area) => ({
     ...area,
-    id: area.section && area.area_id ? `${area.section}-${area.area_id}` : undefined
+    id: area.section && area.area_id ? `${area.section}-${area.area_id}` : undefined,
   }));
 
   let hasErrors = false;
-  
+
   // Validate Areas
   const validatedAreas = [];
   for (let i = 0; i < preparedAreas.length; i++) {
@@ -90,7 +93,7 @@ async function main() {
     if (!result.success) {
       hasErrors = true;
       console.error(`ERROR in 'areas' row ${i + 2}:`);
-      result.error.issues.forEach(issue => {
+      result.error.issues.forEach((issue) => {
         console.error(`  Column '${issue.path.join('.')}' - ${issue.message}`);
       });
     } else {
@@ -102,7 +105,9 @@ async function main() {
             hasErrors = true;
             foundBanned = true;
             for (const v of violations) {
-              console.error(`ERROR in 'areas' row ${i + 2}: ${formatViolation(`Column '${key}'`, v)}`);
+              console.error(
+                `ERROR in 'areas' row ${i + 2}: ${formatViolation(`Column '${key}'`, v)}`
+              );
             }
           }
         }
@@ -119,7 +124,7 @@ async function main() {
     if (!result.success) {
       hasErrors = true;
       console.error(`ERROR in 'items' row ${i + 2} (ID: ${row.id || 'unknown'}):`);
-      result.error.issues.forEach(issue => {
+      result.error.issues.forEach((issue) => {
         console.error(`  Column '${issue.path.join('.')}' - ${issue.message}`);
       });
     } else {
@@ -131,7 +136,9 @@ async function main() {
             hasErrors = true;
             foundBanned = true;
             for (const v of violations) {
-              console.error(`ERROR in 'items' row ${i + 2} (ID: ${row.id || 'unknown'}): ${formatViolation(`Column '${key}'`, v)}`);
+              console.error(
+                `ERROR in 'items' row ${i + 2} (ID: ${row.id || 'unknown'}): ${formatViolation(`Column '${key}'`, v)}`
+              );
             }
           }
         }
@@ -139,21 +146,23 @@ async function main() {
       if (!foundBanned) validatedItems.push(result.data);
     }
   }
-  
+
   // Cross-reference checks
   if (!hasErrors) {
-    const areaKeys = new Set(validatedAreas.map(a => `${a.section}-${a.area_id}`));
+    const areaKeys = new Set(validatedAreas.map((a) => `${a.section}-${a.area_id}`));
     for (const item of validatedItems) {
       const key = `${item.section}-${item.area_id}`;
       if (!areaKeys.has(key)) {
         hasErrors = true;
-        console.error(`ERROR in 'items': Item ${item.id} references area_id '${item.area_id}' in section '${item.section}' which does not exist in 'areas' tab.`);
+        console.error(
+          `ERROR in 'items': Item ${item.id} references area_id '${item.area_id}' in section '${item.section}' which does not exist in 'areas' tab.`
+        );
       }
     }
   }
 
   if (hasErrors) {
-    console.error("\nSync failed due to validation errors. No files were written.");
+    console.error('\nSync failed due to validation errors. No files were written.');
     process.exit(1);
   }
 
@@ -164,15 +173,17 @@ async function main() {
   // Write files
   const areasPath = path.join(process.cwd(), 'src', 'data', 'areas.json');
   const itemsPath = path.join(process.cwd(), 'src', 'data', 'items.json');
-  
+
   fs.writeFileSync(areasPath, JSON.stringify(validatedAreas, null, 2));
   fs.writeFileSync(itemsPath, JSON.stringify(validatedItems, null, 2));
-  
-  console.log(`Successfully synced ${validatedAreas.length} areas and ${validatedItems.length} items.`);
-  
+
+  console.log(
+    `Successfully synced ${validatedAreas.length} areas and ${validatedItems.length} items.`
+  );
+
   try {
     execSync('npm run check:images', { stdio: 'inherit' });
-  } catch(e) {
+  } catch (e) {
     // script handles its own output
   }
 }

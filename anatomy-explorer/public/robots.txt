@@ -1,0 +1,14 @@
+# Robots policy for the patient handbook.
+#
+# The library is meant to be findable — a patient searching "neck stretch
+# physiotherapy" should be able to reach the public pages. The clinician's
+# review surface must never be indexed: /preview renders draft, unreviewed and
+# placeholder-image content, and noindex is a request rather than a rule.
+# Disallow is the rule. See docs/IMPROVEMENTS-2026-09-05.md (H4).
+
+User-agent: *
+Allow: /
+Disallow: /preview
+Disallow: /preview/
+
+Sitemap: https://physioapp-nine.vercel.app/sitemap-index.xml

@@ -1,0 +1,204 @@
+---
+/**
+ * 404 — the page a patient lands on from a stale QR code or a mistyped link.
+ *
+ * It exists because the alternative is Vercel's default, which on this app is a
+ * blank page with no way back except the browser button. A patient who was sent
+ * a QR code by a clinic and gets a dead end does not retry the clinic; they
+ * give up on the exercises. So this page does three things in order: says what
+ * happened in one line, offers the route that always exists (the body-area
+ * finder), and lists the areas that actually have content today, so a person
+ * who knows what they were sent can still get to it.
+ *
+ * No invented links: every area listed here comes from the same
+ * `getAreaChoices()` the rest of the app uses, so nothing can point at an empty
+ * area (A-005).
+ */
+import Base from '../layouts/Base.astro';
+import RegionFigure from '../components/anatomy/RegionFigure.astro';
+import { getAreaChoices } from '../data/anatomy/body-regions';
+
+const areaChoices = await getAreaChoices();
+---
+
+<Base
+  title="Page not found | Physiotherapy"
+  description="That link does not lead anywhere in the patient library. Start from your body area instead."
+>
+  <div class="nf">
+    <div class="nf-copy">
+      <p class="crumb">404</p>
+      <h1>That page is not here</h1>
+      <p class="lede">
+        The link may be old, or mistyped. Nothing is wrong with your exercises — start from the body
+        area your physiotherapist pointed to and you will find them.
+      </p>
+      <a class="primary" href="/find-my-area/">
+        Find my body area
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg
+        >
+      </a>
+      <p class="second">
+        Or go to the <a href="/">library home</a>. If a link on a printed sheet fails, the clinic
+        can reissue it — that is what the <a href="/clinic/">clinic hand-off</a> screen is for.
+      </p>
+    </div>
+    <div class="nf-figure" aria-hidden="true">
+      <RegionFigure areaId="neck" />
+    </div>
+  </div>
+
+  {
+    areaChoices.length > 0 && (
+      <nav class="areas" aria-label="Body areas with content">
+        <h2>Jump straight to an area</h2>
+        <ul>
+          {areaChoices.map((choice) => (
+            <li>
+              <a href={`/area/${choice.areaId}/`}>
+                <span class="fig" aria-hidden="true">
+                  <RegionFigure areaId={choice.areaId} zoom />
+                </span>
+                <span class="name">{choice.name}</span>
+                <span class="count">
+                  {choice.routes.reduce((total, route) => total + route.count, 0)} items
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    )
+  }
+</Base>
+
+<style>
+  .nf {
+    display: grid;
+    gap: 22px;
+    align-items: center;
+    padding: 30px 0 6px;
+  }
+  @media (min-width: 760px) {
+    .nf {
+      grid-template-columns: 1.4fr 0.6fr;
+    }
+  }
+  .crumb {
+    font-family: var(--f-mono);
+    font-size: calc(var(--fs-label) * var(--scale));
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 8px;
+  }
+  .nf h1 {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: calc(clamp(28px, 7vw, 40px) * var(--scale));
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .lede {
+    margin: 0 0 18px;
+    color: var(--ink-2);
+    max-width: 54ch;
+    font-size: calc(17px * var(--scale));
+  }
+  .primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 48px;
+    padding: 0 18px;
+    border-radius: 12px;
+    background: var(--brand);
+    color: var(--brand-ink);
+    text-decoration: none;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(16px * var(--scale));
+  }
+  .primary svg {
+    width: 18px;
+    height: 18px;
+  }
+  .primary:hover {
+    filter: brightness(0.95);
+  }
+  .second {
+    margin: 14px 0 0;
+    color: var(--ink-3);
+    font-size: calc(15px * var(--scale));
+  }
+  .second a {
+    color: var(--ink-2);
+  }
+  .nf-figure {
+    justify-self: center;
+    block-size: 180px;
+  }
+
+  .areas {
+    margin-top: 26px;
+  }
+  .areas h2 {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(var(--fs-label) * var(--scale));
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 12px;
+  }
+  .areas ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 9px;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  .areas a {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: calc(16px * var(--scale));
+  }
+  .areas .fig {
+    block-size: 42px;
+    inline-size: 22px;
+  }
+  .areas .fig :global(.figure) {
+    block-size: 100%;
+  }
+  .areas .count {
+    font-family: var(--f-mono);
+    font-size: calc(11.5px * var(--scale));
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  @media (hover: hover) {
+    .areas a:hover {
+      border-color: var(--brand);
+    }
+  }
+</style>

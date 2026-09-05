@@ -10,16 +10,16 @@ Patient publication remains blocked wherever an approval row is open.
 
 ## Decision summary
 
-| ID | Proposed decision | Build now | Publication owner |
-|---|---|---:|---|
-| L1 | Position as clinician-guided patient education; apply the stricter advertising controls voluntarily | Yes | Medical Director / regulatory adviser |
-| L2 | Urgent-care stop screen with jurisdiction placeholders and no onward exercise route | Preview only | Medical Director |
-| L3 | Plain-language educational disclaimer, persistent short line plus full page | Preview only | Medical Director / legal adviser |
-| L4 | Controlled 3D renders first; licensed assets when a movement cannot be represented reliably | Yes, draft assets | Clinician + product owner |
-| L5 | Region-by-region rendered sign-off against front/back reference views | Yes | Physiotherapist |
-| L6 | Canonical domain pattern `handbook.<clinic-domain>` | Configure later | Product owner / clinic |
-| L7 | No inferred “Start here” ranking in v1 | Yes | Physiotherapist may enable later |
-| L8 | Hybrid information architecture: area chapter plus dedicated canonical exercise pages | Yes | Product owner; clinician reviews usability |
+| ID  | Proposed decision                                                                                   |         Build now | Publication owner                          |
+| --- | --------------------------------------------------------------------------------------------------- | ----------------: | ------------------------------------------ |
+| L1  | Position as clinician-guided patient education; apply the stricter advertising controls voluntarily |               Yes | Medical Director / regulatory adviser      |
+| L2  | Urgent-care stop screen with jurisdiction placeholders and no onward exercise route                 |      Preview only | Medical Director                           |
+| L3  | Plain-language educational disclaimer, persistent short line plus full page                         |      Preview only | Medical Director / legal adviser           |
+| L4  | Controlled 3D renders first; licensed assets when a movement cannot be represented reliably         | Yes, draft assets | Clinician + product owner                  |
+| L5  | Region-by-region rendered sign-off against front/back reference views                               |               Yes | Physiotherapist                            |
+| L6  | Canonical domain pattern `handbook.<clinic-domain>`                                                 |   Configure later | Product owner / clinic                     |
+| L7  | No inferred “Start here” ranking in v1                                                              |               Yes | Physiotherapist may enable later           |
+| L8  | Hybrid information architecture: area chapter plus dedicated canonical exercise pages               |               Yes | Product owner; clinician reviews usability |
 
 ---
 
@@ -38,13 +38,13 @@ the clinic's jurisdiction and deployment model.
 
 ### Accountabilities
 
-| Responsibility | Accountable role |
-|---|---|
-| Product scope, exclusions, UX, and technical controls | Product owner |
-| Clinical content, dosage, mappings, movement fidelity | Treating physiotherapist / clinical content owner |
-| Regulatory classification and jurisdiction-sensitive wording | Medical Director or regulatory adviser |
-| Privacy/security implementation | Product owner, with clinic governance approval |
-| Final production release | Product owner and Medical Director jointly |
+| Responsibility                                               | Accountable role                                  |
+| ------------------------------------------------------------ | ------------------------------------------------- |
+| Product scope, exclusions, UX, and technical controls        | Product owner                                     |
+| Clinical content, dosage, mappings, movement fidelity        | Treating physiotherapist / clinical content owner |
+| Regulatory classification and jurisdiction-sensitive wording | Medical Director or regulatory adviser            |
+| Privacy/security implementation                              | Product owner, with clinic governance approval    |
+| Final production release                                     | Product owner and Medical Director jointly        |
 
 ### Approval record
 
@@ -215,16 +215,16 @@ Technical mesh validity is not clinical approval.
 
 ### Sign-off matrix
 
-| Region | Front | Back | Side behavior | Highlight extent | Destination | Status |
-|---|---|---|---|---|---|---|
-| Neck | review | review | review | review | review | Unapproved |
-| Shoulder | review | review | review | review | review | Unapproved |
-| Elbow | review | review | review | review | review | Unapproved |
-| Wrist/hand | review | review | review | review | review | Unapproved |
-| Hip | review | review | review | review | review | Unapproved |
-| Knee | review | review | review | review | review | Unapproved |
-| Ankle/foot | review | review | review | review | review | Unapproved |
-| Lower back | not selectable | review | review | review | review | Unapproved |
+| Region     | Front          | Back   | Side behavior | Highlight extent | Destination | Status     |
+| ---------- | -------------- | ------ | ------------- | ---------------- | ----------- | ---------- |
+| Neck       | review         | review | review        | review           | review      | Unapproved |
+| Shoulder   | review         | review | review        | review           | review      | Unapproved |
+| Elbow      | review         | review | review        | review           | review      | Unapproved |
+| Wrist/hand | review         | review | review        | review           | review      | Unapproved |
+| Hip        | review         | review | review        | review           | review      | Unapproved |
+| Knee       | review         | review | review        | review           | review      | Unapproved |
+| Ankle/foot | review         | review | review        | review           | review      | Unapproved |
+| Lower back | not selectable | review | review        | review           | review      | Unapproved |
 
 Approval is region-specific. One approved region does not approve the model globally.
 

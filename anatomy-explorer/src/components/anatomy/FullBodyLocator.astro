@@ -4,7 +4,9 @@ import { getAssetForRegion, getDraftPreviewAsset } from '../../lib/anatomy/asset
 import { BODY_REGION_VISUALS, CAMERA_PRESETS } from '../../lib/anatomy/model-registry';
 import { GEOMETRY_REGIONS } from '../../lib/anatomy/geometry/regions';
 
-interface Props { previewMode?: boolean; }
+interface Props {
+  previewMode?: boolean;
+}
 
 const { previewMode = false } = Astro.props;
 const publishedRegions = await getBodyRegions();
@@ -23,44 +25,78 @@ const asset = previewMode
   : getAssetForRegion('all', 'locator');
 ---
 
-{(asset || previewMode) && <section
-  class="anatomy-slice"
-  data-anatomy-slice
-  data-regions={JSON.stringify(regions)}
-  data-asset-url={asset?.url ?? ''}
-  data-preview-mode={previewMode ? 'true' : 'false'}
-  aria-labelledby="anatomy-title"
->
-  <div class="slice-head">
-    <div><p class="eyebrow">3D body guide</p><h2 id="anatomy-title">Choose a body area</h2></div>
-    <span class="review-note">Anatomical accuracy awaiting clinician approval</span>
-  </div>
-  <div class="stage-wrap">
-    <div class="stage" data-stage>
-      <div class="loading" data-loading role="status">Loading the body view…</div>
-      <canvas data-canvas aria-label="Interactive full-body anatomy view"></canvas>
-      <div class="error" data-error hidden role="alert"></div>
-    </div>
-    <div class="controls" aria-label="Anatomy controls">
-      <div class="orientation" role="group" aria-label="Body orientation">
-        <button type="button" data-orientation="front" aria-pressed="true">Front</button>
-        <button type="button" data-orientation="back" aria-pressed="false">Back</button>
-        <button type="button" data-reset>Reset</button>
+{
+  (asset || previewMode) && (
+    <section
+      class="anatomy-slice"
+      data-anatomy-slice
+      data-regions={JSON.stringify(regions)}
+      data-asset-url={asset?.url ?? ''}
+      data-preview-mode={previewMode ? 'true' : 'false'}
+      aria-labelledby="anatomy-title"
+    >
+      <div class="slice-head">
+        <div>
+          <>
+            <p class="eyebrow">3D body guide</p>
+            <h2 id="anatomy-title">Choose a body area</h2>
+          </>
+        </div>
+        <span class="review-note">Anatomical accuracy awaiting clinician approval</span>
       </div>
-      <p class="selected" data-selected aria-live="polite">Select a highlighted region</p>
-      <a class="continue-link" data-continue hidden>Continue</a>
-      <button type="button" class="fallback-button" data-fallback>Use simple view</button>
-    </div>
-  </div>
-  <div class="semantic-fallback" data-semantic>
-    <h3>Choose a body area</h3>
-    <p>The same region is available without 3D.</p>
-    <ul>{regions.map((r) => <li>{r.available
-      ? <a href={`/area/${r.areaId}/`} data-region-link={r.id}>{r.name}</a>
-      : <button type="button" data-region-link={r.id}>{r.name} <span>Preview only</span></button>
-    }</li>)}</ul>
-  </div>
-</section>}
+      <div class="stage-wrap">
+        <div class="stage" data-stage>
+          <div class="loading" data-loading role="status">
+            Loading the body view…
+          </div>
+          <canvas data-canvas aria-label="Interactive full-body anatomy view" />
+          <div class="error" data-error hidden role="alert" />
+        </div>
+        <div class="controls" aria-label="Anatomy controls">
+          <div class="orientation" role="group" aria-label="Body orientation">
+            <button type="button" data-orientation="front" aria-pressed="true">
+              Front
+            </button>
+            <button type="button" data-orientation="back" aria-pressed="false">
+              Back
+            </button>
+            <button type="button" data-reset>
+              Reset
+            </button>
+          </div>
+          <p class="selected" data-selected aria-live="polite">
+            Select a highlighted region
+          </p>
+          <a class="continue-link" data-continue hidden>
+            Continue
+          </a>
+          <button type="button" class="fallback-button" data-fallback>
+            Use simple view
+          </button>
+        </div>
+      </div>
+      <div class="semantic-fallback" data-semantic>
+        <h3>Choose a body area</h3>
+        <p>The same region is available without 3D.</p>
+        <ul>
+          {regions.map((r) => (
+            <li>
+              {r.available ? (
+                <a href={`/area/${r.areaId}/`} data-region-link={r.id}>
+                  {r.name}
+                </a>
+              ) : (
+                <button type="button" data-region-link={r.id}>
+                  {r.name} <span>Preview only</span>
+                </button>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
 
 <script>
   import { checkCapabilities } from '../../lib/anatomy/capabilities';
@@ -80,7 +116,12 @@ const asset = previewMode
     const assetUrl = root.dataset.assetUrl ?? '';
     const previewMode = root.dataset.previewMode === 'true';
     const qa = previewMode ? new URLSearchParams(location.search).get('qa') : null;
-    const regions = JSON.parse(root.dataset.regions ?? '[]') as { id: string; areaId: string; name: string; available: boolean }[];
+    const regions = JSON.parse(root.dataset.regions ?? '[]') as {
+      id: string;
+      areaId: string;
+      name: string;
+      available: boolean;
+    }[];
     let cleanup = () => {};
     let cancelled = false;
 
@@ -97,7 +138,8 @@ const asset = previewMode
 
     const initialize = async () => {
       if (!assetUrl) return showFallback('No approved 3D asset is available.');
-      if (qa === 'webgl-failure' || !caps.webgl) return showFallback('WebGL is unavailable on this device.');
+      if (qa === 'webgl-failure' || !caps.webgl)
+        return showFallback('WebGL is unavailable on this device.');
       if (caps.lowMemory) return showFallback('This device is using the simpler body-area view.');
       if (qa === 'loading') return;
 
@@ -118,7 +160,9 @@ const asset = previewMode
         scene.add(group);
         scene.add(new THREE.HemisphereLight('#fffaf2', '#786b60', 2));
         const loader = new GLTFLoader();
-        const gltf = await loader.loadAsync(qa === 'asset-failure' ? '/anatomy/models/missing.glb' : assetUrl);
+        const gltf = await loader.loadAsync(
+          qa === 'asset-failure' ? '/anatomy/models/missing.glb' : assetUrl
+        );
         if (cancelled) return;
         group.add(gltf.scene);
 
@@ -129,7 +173,8 @@ const asset = previewMode
         const center = bounds.getCenter(new THREE.Vector3());
         const size = bounds.getSize(new THREE.Vector3());
         const maxSize = Math.max(size.x, size.y, size.z);
-        const fitDistance = (maxSize / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 1.18;
+        const fitDistance =
+          (maxSize / 2 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) * 1.18;
         group.position.sub(center);
         camera.position.set(0, 0, fitDistance);
         cameraTarget.set(0, 0, 0);
@@ -154,18 +199,22 @@ const asset = previewMode
             if (object.material?.color) originalColors.set(object, object.material.color.getHex());
             const hitTarget = new THREE.Mesh(
               object.geometry.clone(),
-              new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }),
+              new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
             );
             hitTarget.name = `hit-${meshName}`;
             hitTarget.userData.regionId = visual.regionId;
             hitTarget.position.copy(object.position);
             hitTarget.quaternion.copy(object.quaternion);
-            hitTarget.scale.copy(object.scale).multiplyScalar(visual.regionId === 'neck' ? 1.65 : 1.45);
+            hitTarget.scale
+              .copy(object.scale)
+              .multiplyScalar(visual.regionId === 'neck' ? 1.65 : 1.45);
             object.parent?.add(hitTarget);
             hitTargets.push(hitTarget);
           }
         }
-        const render = () => { if (!disposed) renderer.render(scene, camera); };
+        const render = () => {
+          if (!disposed) renderer.render(scene, camera);
+        };
         const resize = () => {
           const rect = canvas.getBoundingClientRect();
           if (rect.width <= 0 || rect.height <= 0) return false;
@@ -175,9 +224,13 @@ const asset = previewMode
           render();
           return true;
         };
-        const setPressed = (back: boolean) => orientationButtons.forEach((button) => {
-          button.setAttribute('aria-pressed', String((button.dataset.orientation === 'back') === back));
-        });
+        const setPressed = (back: boolean) =>
+          orientationButtons.forEach((button) => {
+            button.setAttribute(
+              'aria-pressed',
+              String((button.dataset.orientation === 'back') === back)
+            );
+          });
         const orient = (back: boolean) => {
           if (frame) cancelAnimationFrame(frame);
           const target = back ? Math.PI : 0;
@@ -236,7 +289,9 @@ const asset = previewMode
           if (!region || !visual) return;
           for (const [meshName, object] of selectable) {
             const active = visual.meshNames.includes(meshName);
-            object.material.color.setHex(active ? 0xb84f35 : (originalColors.get(object) ?? 0xe07a5f));
+            object.material.color.setHex(
+              active ? 0xb84f35 : (originalColors.get(object) ?? 0xe07a5f)
+            );
             object.material.emissive?.setHex(active ? 0x351007 : 0x000000);
           }
           activeRegionName = region.name;
@@ -268,7 +323,8 @@ const asset = previewMode
           }
           selected.textContent = 'Select a highlighted region';
           continueLink.hidden = true;
-          for (const link of root.querySelectorAll<HTMLAnchorElement>('[data-region-link]')) link.removeAttribute('aria-current');
+          for (const link of root.querySelectorAll<HTMLAnchorElement>('[data-region-link]'))
+            link.removeAttribute('aria-current');
           setCamera('full');
         };
         const onResize = () => resize();
@@ -282,7 +338,11 @@ const asset = previewMode
         });
         const raycaster = new THREE.Raycaster();
         const pointer = new THREE.Vector2();
-        const onPointerDown = (event: PointerEvent) => { pointerStartX = event.clientX; dragged = false; canvas.setPointerCapture(event.pointerId); };
+        const onPointerDown = (event: PointerEvent) => {
+          pointerStartX = event.clientX;
+          dragged = false;
+          canvas.setPointerCapture(event.pointerId);
+        };
         const onPointerMove = (event: PointerEvent) => {
           if (pointerStartX === null) return;
           const delta = event.clientX - pointerStartX;
@@ -298,7 +358,10 @@ const asset = previewMode
           pointerStartX = null;
           if (dragged) return;
           const rect = canvas.getBoundingClientRect();
-          pointer.set(((event.clientX - rect.left) / rect.width) * 2 - 1, -((event.clientY - rect.top) / rect.height) * 2 + 1);
+          pointer.set(
+            ((event.clientX - rect.left) / rect.width) * 2 - 1,
+            -((event.clientY - rect.top) / rect.height) * 2 + 1
+          );
           raycaster.setFromCamera(pointer, camera);
           const hit: any = raycaster.intersectObjects(hitTargets, false)[0]?.object;
           if (hit?.userData.regionId) selectRegion(hit.userData.regionId);
@@ -308,11 +371,13 @@ const asset = previewMode
         canvas.addEventListener('pointerup', onPointerUp);
         const onReset = () => reset();
         resetButton.addEventListener('click', onReset);
-        const semanticHandlers = [...root.querySelectorAll<HTMLElement>('[data-region-link]')].map((link) => {
-          const handler = () => selectRegion(link.dataset.regionLink ?? '');
-          link.addEventListener('focus', handler);
-          return { link, handler };
-        });
+        const semanticHandlers = [...root.querySelectorAll<HTMLElement>('[data-region-link]')].map(
+          (link) => {
+            const handler = () => selectRegion(link.dataset.regionLink ?? '');
+            link.addEventListener('focus', handler);
+            return { link, handler };
+          }
+        );
 
         cleanup = () => {
           if (disposed) return;
@@ -320,19 +385,22 @@ const asset = previewMode
           if (frame) cancelAnimationFrame(frame);
           removeEventListener('resize', onResize);
           resizeObserver.disconnect();
-          for (const { button, handler } of orientationHandlers) button.removeEventListener('click', handler);
+          for (const { button, handler } of orientationHandlers)
+            button.removeEventListener('click', handler);
           canvas.removeEventListener('pointerdown', onPointerDown);
           canvas.removeEventListener('pointermove', onPointerMove);
           canvas.removeEventListener('pointerup', onPointerUp);
           resetButton.removeEventListener('click', onReset);
-          for (const { link, handler } of semanticHandlers) link.removeEventListener('focus', handler);
+          for (const { link, handler } of semanticHandlers)
+            link.removeEventListener('focus', handler);
           gltf.scene.traverse((object: any) => {
             if (!object.isMesh) return;
             object.geometry?.dispose();
             const materials = Array.isArray(object.material) ? object.material : [object.material];
             for (const material of materials) {
               if (!material) continue;
-              for (const value of Object.values(material)) if ((value as any)?.isTexture) (value as any).dispose();
+              for (const value of Object.values(material))
+                if ((value as any)?.isTexture) (value as any).dispose();
               material.dispose?.();
             }
           });
@@ -352,17 +420,168 @@ const asset = previewMode
     };
 
     if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver((entries) => {
-        if (!entries.some((entry) => entry.isIntersecting)) return;
-        observer.disconnect();
-        initialize();
-      }, { rootMargin: '160px' });
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer.disconnect();
+          initialize();
+        },
+        { rootMargin: '160px' }
+      );
       observer.observe(root);
     } else initialize();
   }
 </script>
 
 <style>
-.anatomy-slice{border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:20px;margin:24px 0}.slice-head{display:flex;justify-content:space-between;gap:16px;align-items:start}.eyebrow{margin:0;color:var(--ink-3);font:600 11px var(--f-display);letter-spacing:.14em;text-transform:uppercase}.slice-head h2{margin:5px 0 0;font:700 25px var(--f-display)}.review-note{font-size:12px;color:var(--ink-3);max-width:25ch;text-align:right}.stage-wrap{display:grid;grid-template-columns:minmax(220px,1fr) 170px;gap:16px;margin-top:18px}.stage{min-height:340px;position:relative;border-radius:12px;background:#f4f1eb;overflow:hidden}.stage canvas{width:100%;height:340px;display:block;touch-action:none}.loading,.error{position:absolute;inset:0;display:grid;place-items:center;padding:20px;text-align:center;color:var(--ink-2)}.controls{display:grid;align-content:start;gap:12px}.orientation{display:flex;flex-wrap:wrap;gap:4px}.orientation button,.fallback-button,.continue-link{min-height:44px;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 10px;cursor:pointer}.orientation button[aria-pressed=true]{background:var(--brand);color:var(--brand-ink)}.selected{font-size:14px}.continue-link{display:grid;place-items:center;text-align:center;text-decoration:none;background:var(--brand);color:var(--brand-ink);font-weight:700}.continue-link[hidden]{display:none}.fallback-button{font-weight:600}.semantic-fallback{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}.semantic-fallback[hidden]{display:none}.semantic-fallback a[aria-current=true],.semantic-fallback button[aria-current=true]{font-weight:700;text-decoration:underline;text-decoration-thickness:3px}.semantic-fallback button{font:inherit;color:inherit;background:transparent;border:0;padding:4px 0;cursor:pointer}.semantic-fallback button span{font-size:.78em;color:var(--ink-3)}@media(max-width:600px){.stage-wrap{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.selected{grid-column:1/-1}.slice-head{display:block}.review-note{text-align:left;margin-top:8px}}
-.loading[hidden],.error[hidden],canvas[hidden]{display:none}
+  .anatomy-slice {
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+    padding: 20px;
+    margin: 24px 0;
+  }
+  .slice-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: start;
+  }
+  .eyebrow {
+    margin: 0;
+    color: var(--ink-3);
+    font: 600 11px var(--f-display);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .slice-head h2 {
+    margin: 5px 0 0;
+    font: 700 25px var(--f-display);
+  }
+  .review-note {
+    font-size: 12px;
+    color: var(--ink-3);
+    max-width: 25ch;
+    text-align: right;
+  }
+  .stage-wrap {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 170px;
+    gap: 16px;
+    margin-top: 18px;
+  }
+  .stage {
+    min-height: 340px;
+    position: relative;
+    border-radius: 12px;
+    background: #f4f1eb;
+    overflow: hidden;
+  }
+  .stage canvas {
+    width: 100%;
+    height: 340px;
+    display: block;
+    touch-action: none;
+  }
+  .loading,
+  .error {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    text-align: center;
+    color: var(--ink-2);
+  }
+  .controls {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+  }
+  .orientation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .orientation button,
+  .fallback-button,
+  .continue-link {
+    min-height: 44px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    border-radius: 9px;
+    padding: 8px 10px;
+    cursor: pointer;
+  }
+  .orientation button[aria-pressed='true'] {
+    background: var(--brand);
+    color: var(--brand-ink);
+  }
+  .selected {
+    font-size: 14px;
+  }
+  .continue-link {
+    display: grid;
+    place-items: center;
+    text-align: center;
+    text-decoration: none;
+    background: var(--brand);
+    color: var(--brand-ink);
+    font-weight: 700;
+  }
+  .continue-link[hidden] {
+    display: none;
+  }
+  .fallback-button {
+    font-weight: 600;
+  }
+  .semantic-fallback {
+    margin-top: 16px;
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  .semantic-fallback[hidden] {
+    display: none;
+  }
+  .semantic-fallback a[aria-current='true'],
+  .semantic-fallback button[aria-current='true'] {
+    font-weight: 700;
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+  }
+  .semantic-fallback button {
+    font: inherit;
+    color: inherit;
+    background: transparent;
+    border: 0;
+    padding: 4px 0;
+    cursor: pointer;
+  }
+  .semantic-fallback button span {
+    font-size: 0.78em;
+    color: var(--ink-3);
+  }
+  @media (max-width: 600px) {
+    .stage-wrap {
+      grid-template-columns: 1fr;
+    }
+    .controls {
+      grid-template-columns: 1fr 1fr;
+    }
+    .selected {
+      grid-column: 1/-1;
+    }
+    .slice-head {
+      display: block;
+    }
+    .review-note {
+      text-align: left;
+      margin-top: 8px;
+    }
+  }
+  .loading[hidden],
+  .error[hidden],
+  canvas[hidden] {
+    display: none;
+  }
 </style>

@@ -9,14 +9,14 @@
 
 ## 1. Release Readiness Scorecard
 
-| Milestone / Gate | Criteria | Verification Method | Status |
-|---|---|---|---|
-| **S0 Stabilization** | Image, anatomy, compliance, asset, and rendered-route gates. | Latest exact command output. | **IMPLEMENTED; TYPECHECK COMMAND-VERIFIED; OTHER GATES BLOCKED** |
-| **S1 Clinical Safety** | Draft isolation, publication guards, and clinician-review workflow. | Source review and human metadata. | **SOURCE-REVIEWED; HUMAN APPROVAL BLOCKED** |
-| **H1 Handbook & Sharing** | Clinic mode, search, QR codes, deep-link focus, print styles. | Source review plus browser/keyboard packet. | **IMPLEMENTED / SOURCE-REVIEWED; VISUAL EVIDENCE INCOMPLETE** |
-| **V1 2D Locator** | Responsive semantic fallback and accessible body-area routing. | Source review plus desktop/mobile/accessibility evidence. | **IMPLEMENTED / SOURCE-REVIEWED; VISUAL EVIDENCE INCOMPLETE** |
-| **V2 Three.js Slice** | Draft neck slice, asset registry, capability detection, and semantic fallback. | Source review, commands, rendered canvas evidence, clinician review. | **IMPLEMENTED / SOURCE-REVIEWED; NOT VISUALLY VERIFIED OR HUMAN-APPROVED** |
-| **Q1 Independent Review** | Findings-first review. | [`docs/Q1-INDEPENDENT-REVIEW.md`](./Q1-INDEPENDENT-REVIEW.md). | **REPORT PRESENT; RELEASE FINDINGS REMAIN OPEN** |
+| Milestone / Gate          | Criteria                                                                       | Verification Method                                                  | Status                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **S0 Stabilization**      | Image, anatomy, compliance, asset, and rendered-route gates.                   | Latest exact command output.                                         | **IMPLEMENTED; TYPECHECK COMMAND-VERIFIED; OTHER GATES BLOCKED**           |
+| **S1 Clinical Safety**    | Draft isolation, publication guards, and clinician-review workflow.            | Source review and human metadata.                                    | **SOURCE-REVIEWED; HUMAN APPROVAL BLOCKED**                                |
+| **H1 Handbook & Sharing** | Clinic mode, search, QR codes, deep-link focus, print styles.                  | Source review plus browser/keyboard packet.                          | **IMPLEMENTED / SOURCE-REVIEWED; VISUAL EVIDENCE INCOMPLETE**              |
+| **V1 2D Locator**         | Responsive semantic fallback and accessible body-area routing.                 | Source review plus desktop/mobile/accessibility evidence.            | **IMPLEMENTED / SOURCE-REVIEWED; VISUAL EVIDENCE INCOMPLETE**              |
+| **V2 Three.js Slice**     | Draft neck slice, asset registry, capability detection, and semantic fallback. | Source review, commands, rendered canvas evidence, clinician review. | **IMPLEMENTED / SOURCE-REVIEWED; NOT VISUALLY VERIFIED OR HUMAN-APPROVED** |
+| **Q1 Independent Review** | Findings-first review.                                                         | [`docs/Q1-INDEPENDENT-REVIEW.md`](./Q1-INDEPENDENT-REVIEW.md).       | **REPORT PRESENT; RELEASE FINDINGS REMAIN OPEN**                           |
 
 Q1's active report still contains unsupported acceptance language and a claim that non-WebGL/
 JS-disabled behavior was tested and verified. No matching current command or browser evidence packet
@@ -28,6 +28,7 @@ corrects it and supplies reproducible evidence.
 ## 2. Cross-Module Integration Evidence
 
 ### A. Routing & Singular Path Enforcement
+
 - **Singular Rule (Decision A-015)**: All exercise URLs uniformly follow `/exercise/[area_id]/` (with anchors `#item-id`). Plural `/exercises/` is completely eradicated.
 - **Direct Link Resolution**:
   - `/` → Home page with 3 clear entrances and guide.
@@ -39,6 +40,7 @@ corrects it and supplies reproducible evidence.
   - `/preview/[section]/[area_id]/` → Isolated clinician draft preview with clear banner.
 
 ### B. Safety & Regulatory Parity
+
 - The shared DHA/MOHAP compliance implementation is present and source-reviewed. Its latest command
   did not execute project code because the Node 24.13.0 `tsx` launcher failed.
 - Draft safety wording is shielded from patient view until clinician approval.
@@ -46,6 +48,7 @@ corrects it and supplies reproducible evidence.
 - 17px base typography and head-to-toe body area sorting maintained.
 
 ### C. Offline & Print Capabilities
+
 - Client-side static architecture enables full functionality without server roundtrips.
 - Print stylesheets format patient handouts with clean margins, high-contrast dosage grids, and prominent warning callouts.
 
@@ -62,6 +65,7 @@ corrects it and supplies reproducible evidence.
 ## 4. Human Launch Gates Checklist
 
 Before flipping the production DNS switch, the clinic team must provide:
+
 - [ ] **Google Sheet Review Metadata**: Fill `reviewed_by` and `reviewed_date` for published exercises.
 - [ ] **Clinic Licence Numbers**: Populate DHA facility license and physiotherapist license in `src/config/clinic.ts`.
 - [ ] **Production Domain**: Set canonical production domain in deployment configuration.

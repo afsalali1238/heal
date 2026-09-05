@@ -1,0 +1,326 @@
+/**
+ * Motion layer — DESIGN-SYSTEM.md "Motion".
+ *
+ * The system's position is "almost none", and that is still right for a
+ * patient who is older, possibly in pain, and reading clinical instructions:
+ * motion that competes with the words is a defect. What this file adds is the
+ * narrow exception the product actually needs, in three families:
+ *
+ *   1. **State feedback** — hover, focus, pressed and loading states. A tap on
+ *      a phone in a clinic with sunlight on the screen has to be visibly
+ *      acknowledged.
+ *   2. **Orientation** — a short one-shot entrance on card groups, so the page
+ *      that replaced the last one reads as *replaced* rather than flickered.
+ *   3. **The pacer** — the movement guide's glyph, which is the only animation
+ *      in the app that carries information (it shows the class of movement and
+ *      the tempo you were prescribed).
+ *
+ * Three rules keep this honest, and every block below obeys them:
+ *
+ *   - **No JavaScript, wherever CSS can do it.** Entrances use scroll-driven
+ *     animations inside `@supports`, so a browser without them gets the plain,
+ *     complete page. Nothing is hidden waiting for an observer to unhide it.
+ *   - **`prefers-reduced-motion` is honoured twice**: the global kill switch in
+ *     `base.css`, and by not animating anything that a pacer depends on — the
+ *     movement guide swaps to a step list with the same information.
+ *   - **Nothing moves that is not ours.** No parallax, no autoplaying carousels,
+ *     no page transitions (PRD §10 — patients navigate with the back button).
+ */
+
+:root {
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 420ms;
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --lift: 0 1px 2px rgba(17, 24, 39, 0.04), 0 10px 26px rgba(17, 24, 39, 0.07);
+}
+
+/* ── 1. State feedback ───────────────────────────────────────────────────── */
+
+.cardlike,
+.choice,
+.route,
+.item,
+.card {
+  transition:
+    transform var(--dur-2) var(--ease-out),
+    box-shadow var(--dur-2) var(--ease-out),
+    border-color var(--dur-1) linear,
+    background-color var(--dur-1) linear;
+}
+
+@media (hover: hover) {
+  .choice:hover,
+  .route:hover,
+  .card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--lift);
+  }
+
+  .item:hover {
+    border-color: var(--line-2);
+  }
+}
+
+.choice:active,
+.route:active {
+  transform: translateY(0) scale(0.995);
+  transition-duration: 60ms;
+}
+
+/* Focus arrives with intent: the ring fades rather than pops, so a keyboard
+   user can see where they came from without the outline flickering per tab. */
+@keyframes focus-in {
+  from {
+    outline-offset: 7px;
+    outline-color: color-mix(in oklab, var(--brand) 45%, transparent);
+  }
+  to {
+    outline-offset: 2px;
+    outline-color: var(--brand);
+  }
+}
+
+:focus-visible {
+  animation: focus-in var(--dur-1) var(--ease-out);
+}
+
+/* ── 2. Orientation: one-shot entrances, no JS ───────────────────────────── */
+
+/*
+ * `animation-timeline: view()` is a genuinely progressive enhancement: the
+ * element is fully painted by default, and only animates *if* the browser
+ * supports scroll-driven animation. There is no `opacity: 0` in the base rule,
+ * because an unsupported browser would then show a blank page — the failure
+ * mode that kills this pattern in most codebases.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    @keyframes rise-in {
+      from {
+        opacity: 0.4;
+        transform: translateY(10px);
+      }
+    }
+
+    [data-reveal] {
+      animation: rise-in both var(--dur-3) var(--ease-out);
+      animation-timeline: view();
+      animation-range: entry 0% entry 46%;
+    }
+
+    /* Stagger is expressed as a range offset, not a delay, so fast scrolling
+       never leaves a card that has not started. */
+    [data-reveal='1'] {
+      animation-range: entry 0% entry 52%;
+    }
+    [data-reveal='2'] {
+      animation-range: entry 0% entry 58%;
+    }
+    [data-reveal='3'] {
+      animation-range: entry 0% entry 64%;
+    }
+  }
+
+  /* The first screenful has no scroll progress to key off, so it gets a timed
+     entrance — still one-shot, still never hiding content from AT. */
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  [data-enter] {
+    animation: fade-up var(--dur-3) var(--ease-out) both;
+  }
+  [data-enter='2'] {
+    animation-delay: 70ms;
+  }
+  [data-enter='3'] {
+    animation-delay: 140ms;
+  }
+}
+
+/* ── 3. The pacer glyph (movement guide) ─────────────────────────────────── */
+
+@keyframes glyph-arc {
+  0%,
+  100% {
+    transform: rotate(-13deg);
+  }
+  50% {
+    transform: rotate(13deg);
+  }
+}
+
+@keyframes glyph-linear {
+  0%,
+  100% {
+    transform: translateX(-9px);
+  }
+  50% {
+    transform: translateX(9px);
+  }
+}
+
+@keyframes glyph-release {
+  0%,
+  100% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(8px);
+  }
+}
+
+@keyframes glyph-pulse {
+  0%,
+  100% {
+    transform: scale(0.94);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes halo {
+  0%,
+  100% {
+    opacity: 0.28;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* The hold countdown: an SVG circle with a dash offset driven by --p (0→1). */
+.ring-fill {
+  stroke-dasharray: var(--ring-len, 100);
+  stroke-dashoffset: calc(var(--ring-len, 100) * (1 - var(--p, 0)));
+  transition: stroke-dashoffset 240ms linear;
+}
+
+/* A quiet progress bar for the whole set, so the page says "3 of 8" in a
+   shape as well as in words. */
+.progress-rail {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.progress-rail > i {
+  display: block;
+  block-size: 100%;
+  inline-size: calc(var(--p, 0) * 100%);
+  background: var(--brand);
+  border-start-start-radius: 999px;
+  border-end-start-radius: 999px;
+  transition: inline-size var(--dur-2) var(--ease-out);
+}
+
+/* Loading shimmer for the 3D island: a moving highlight over the slot the
+   canvas will occupy, sized to it, so nothing jumps when it swaps in. */
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    color-mix(in oklab, var(--surface) 70%, transparent) 50%,
+    transparent 80%
+  );
+  animation: shimmer 1.6s var(--ease-in-out) infinite;
+}
+
+/* Tappable map shapes acknowledge a pointer before the tap lands — on a phone,
+   with one hand, in pain, that difference is the reason someone retries. */
+@keyframes hotspot-ready {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* A slow breathing loop for decorative figures. Deliberately 7s: slower than a
+   heart rate, so it reads as calm and not as a metronome nobody asked for. */
+@keyframes breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-4px) scale(1.012);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-figure-animated] .figure-body {
+    animation: breathe 7s var(--ease-in-out) infinite;
+    transform-origin: 50% 90%;
+  }
+}
+
+/*
+ * Reduced motion. `base.css` clamps durations globally; this is the part a
+ * duration clamp cannot fix — anything that conveys progress by moving has to
+ * also be legible standing still, so the guide's own state text and the
+ * "3 of 8" numbers are always rendered, never animation-only.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-figure-animated] .figure-body,
+  .glyph-moving,
+  .shimmer::after {
+    animation: none !important;
+  }
+
+  .choice:hover,
+  .route:hover,
+  .card:hover,
+  .choice:active,
+  .route:active {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Print: the figure still earns its place (it shows *where*), the pacer does
+   not, and nothing that only made sense in motion is allowed on paper. */
+@media print {
+  .glyph-moving,
+  .progress-rail,
+  .shimmer::after {
+    display: none !important;
+  }
+
+  .choice,
+  .route,
+  .card,
+  .item {
+    transition: none !important;
+    box-shadow: none !important;
+  }
+}

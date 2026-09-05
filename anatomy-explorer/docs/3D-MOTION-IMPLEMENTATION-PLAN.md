@@ -486,14 +486,14 @@ Primary benchmarks:
 
 Capture a short evidence matrix for these journeys:
 
-| Journey | Evaluation question |
-|---|---|
-| Direct exercise link | Is setup and context immediately understandable? |
-| Body selection | Can a patient choose an area without diagnostic implication? |
-| Motion controls | Are play, pause, replay and parameters obvious? |
-| Mobile | Are controls comfortably usable at phone width? |
-| Print | Is the exercise understandable without motion? |
-| Failure | Does the experience remain complete when media fails? |
+| Journey              | Evaluation question                                          |
+| -------------------- | ------------------------------------------------------------ |
+| Direct exercise link | Is setup and context immediately understandable?             |
+| Body selection       | Can a patient choose an area without diagnostic implication? |
+| Motion controls      | Are play, pause, replay and parameters obvious?              |
+| Mobile               | Are controls comfortably usable at phone width?              |
+| Print                | Is the exercise understandable without motion?               |
+| Failure              | Does the experience remain complete when media fails?        |
 
 Explicitly exclude competitor features that conflict with the product contract: accounts, adherence
 tracking, remote monitoring, prescriptions, telehealth, analytics and patient records.

@@ -34,16 +34,36 @@ import { SAFETY_RULES } from '../data/anatomy/safety-rules';
 const publishedRules = SAFETY_RULES.filter((rule) => rule.status === 'published');
 ---
 
-{publishedRules.length > 0 && <section class="flags" aria-labelledby="flags-title">
-  <h2 id="flags-title">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-    Do not do these today if any of this is true
-  </h2>
-  <ul>
-    {publishedRules.map((rule) => <li>{rule.optionLabel}</li>)}
-  </ul>
-  <p>Contact the clinic instead, or emergency services if it is severe.</p>
-</section>}
+{
+  publishedRules.length > 0 && (
+    <section class="flags" aria-labelledby="flags-title">
+      <h2 id="flags-title">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <>
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </>
+        </svg>
+        Do not do these today if any of this is true
+      </h2>
+      <ul>
+        {publishedRules.map((rule) => (
+          <li>{rule.optionLabel}</li>
+        ))}
+      </ul>
+      <p>Contact the clinic instead, or emergency services if it is severe.</p>
+    </section>
+  )
+}
 
 <style>
   .flags {
@@ -70,7 +90,12 @@ const publishedRules = SAFETY_RULES.filter((rule) => rule.status === 'published'
     text-transform: none;
   }
 
-  .flags h2 svg { width: 18px; height: 18px; flex: none; margin-top: 1px; }
+  .flags h2 svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+    margin-top: 1px;
+  }
 
   .flags ul {
     margin: 0;
@@ -81,9 +106,14 @@ const publishedRules = SAFETY_RULES.filter((rule) => rule.status === 'published'
     line-height: 1.38;
   }
   @media (min-width: 560px) {
-    .flags ul { grid-template-columns: 1fr 1fr; column-gap: 22px; }
+    .flags ul {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 22px;
+    }
   }
-  .flags li::marker { color: var(--warn); }
+  .flags li::marker {
+    color: var(--warn);
+  }
 
   .flags p {
     margin: 10px 0 0;

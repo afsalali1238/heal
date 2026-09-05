@@ -109,7 +109,7 @@ export function validateItems(items: readonly ItemRow[], areas: readonly AreaRow
 
   // ── Items pointing at an area that is not published ──────────────────────
   const publishedAreaKeys = new Set(
-    areas.filter((a) => a.status === 'published').map((a) => `${a.section}/${a.area_id}`),
+    areas.filter((a) => a.status === 'published').map((a) => `${a.section}/${a.area_id}`)
   );
   const allAreaKeys = new Set(areas.map((a) => `${a.section}/${a.area_id}`));
   for (const item of published) {
@@ -173,7 +173,9 @@ export function validateItems(items: readonly ItemRow[], areas: readonly AreaRow
           message: `${field} is ${value.length} characters (soft limit ${MAX_PROSE_CHARS}). Long instructions break the card layout on a phone.`,
         });
       }
-      if (/\b(\d+)\s*(reps?|repetitions?|sets?|seconds?|secs?|times a day|x\s*\d+)\b/i.test(value)) {
+      if (
+        /\b(\d+)\s*(reps?|repetitions?|sets?|seconds?|secs?|times a day|x\s*\d+)\b/i.test(value)
+      ) {
         findings.push({
           level: 'warn',
           rule: 'dosage-in-prose',

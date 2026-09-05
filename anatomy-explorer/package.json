@@ -16,12 +16,21 @@
     "check:anatomy": "tsx scripts/check-anatomy.ts",
     "check:images": "tsx scripts/check-images.ts",
     "check:assets": "tsx scripts/check-assets.ts",
-    "test:gates": "tsx --test tests/gates.test.ts tests/routes.test.ts",
-    "check:all": "npm run check:compliance && npm run check:anatomy && npm run check:images && npm run check:assets && npm run test:gates",
+    "check:poses": "tsx scripts/check-poses.ts",
+    "test:gates": "tsx --test \"tests/**/*.test.ts\"",
+    "check:all": "npm run check:compliance && npm run check:anatomy && npm run check:poses && npm run check:images && npm run check:assets && npm run test:gates",
     "sync:content": "tsx scripts/sync-content.ts",
     "qr": "tsx scripts/generate-qr.ts",
     "astro": "astro",
-    "figures:render": "tsx scripts/render-poses.ts"
+    "figures:render": "tsx scripts/render-poses.ts",
+    "lint": "prettier --check \"src/**/*.{astro,ts,css,json}\" \"scripts/**/*.ts\" \"*.md\"",
+    "format": "prettier --write \"src/**/*.{astro,ts,css,json}\" \"scripts/**/*.ts\"",
+    "test": "tsx --test \"tests/**/*.test.ts\"",
+    "images:render": "tsx scripts/render-share-images.ts",
+    "images:items": "tsx scripts/render-item-figures.ts",
+    "images:movement": "tsx scripts/render-movement-figures.ts",
+    "images:movement:manifest": "tsx scripts/check-poses.ts --write",
+    "crawl": "tsx scripts/crawl-routes.ts"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
@@ -33,6 +42,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "@types/papaparse": "^5.5.2",
     "@types/qrcode": "^1.5.6",
     "dotenv": "^17.4.2",

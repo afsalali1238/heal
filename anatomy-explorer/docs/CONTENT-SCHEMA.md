@@ -18,15 +18,15 @@ Rules that apply everywhere:
 
 One row per body area, per section. `neck` appears twice — once for stretching, once for exercises — because the two sections can have different area lists.
 
-| Column | Type | Required | Notes |
-|---|---|---|---|
-| `area_id` | slug | yes | `neck`, `lower-back`, `hamstrings` |
-| `section` | enum | yes | `stretching` \| `exercise` |
-| `name_en` | text | yes | Display name: `Lower Back` |
-| `name_ar` | text | no | Leave empty until Arabic phase |
-| `order` | integer | yes | Position in the grid. Group related areas near each other. |
-| `status` | enum | yes | `published` \| `draft` \| `retired` |
-| `notes_internal` | text | no | Never shown to patients |
+| Column           | Type    | Required | Notes                                                      |
+| ---------------- | ------- | -------- | ---------------------------------------------------------- |
+| `area_id`        | slug    | yes      | `neck`, `lower-back`, `hamstrings`                         |
+| `section`        | enum    | yes      | `stretching` \| `exercise`                                 |
+| `name_en`        | text    | yes      | Display name: `Lower Back`                                 |
+| `name_ar`        | text    | no       | Leave empty until Arabic phase                             |
+| `order`          | integer | yes      | Position in the grid. Group related areas near each other. |
+| `status`         | enum    | yes      | `published` \| `draft` \| `retired`                        |
+| `notes_internal` | text    | no       | Never shown to patients                                    |
 
 Composite key is `section` + `area_id`. That pair must be unique.
 
@@ -38,21 +38,21 @@ One row per stretch or exercise.
 
 ### Identity
 
-| Column | Type | Required | Notes |
-|---|---|---|---|
-| `id` | slug | yes | `str-neck-02`, `ex-shoulder-04`. Prefix `str-` or `ex-`. Permanent. |
-| `section` | enum | yes | `stretching` \| `exercise` |
-| `area_id` | slug | yes | Must exist in the `areas` tab with the same `section` |
-| `order` | integer | yes | Order within the area. Warm-up first. |
-| `status` | enum | yes | `published` \| `draft` \| `retired` |
+| Column    | Type    | Required | Notes                                                               |
+| --------- | ------- | -------- | ------------------------------------------------------------------- |
+| `id`      | slug    | yes      | `str-neck-02`, `ex-shoulder-04`. Prefix `str-` or `ex-`. Permanent. |
+| `section` | enum    | yes      | `stretching` \| `exercise`                                          |
+| `area_id` | slug    | yes      | Must exist in the `areas` tab with the same `section`               |
+| `order`   | integer | yes      | Order within the area. Warm-up first.                               |
+| `status`  | enum    | yes      | `published` \| `draft` \| `retired`                                 |
 
 ### Naming and classification
 
-| Column | Type | Required | Notes |
-|---|---|---|---|
-| `name_en` | text | yes | Plain name. `Chin Tuck`, not `Cranio-cervical flexion` |
-| `name_ar` | text | no | Arabic phase |
-| `type` | enum | yes for exercises | See list below. Blank for stretches. |
+| Column    | Type | Required          | Notes                                                  |
+| --------- | ---- | ----------------- | ------------------------------------------------------ |
+| `name_en` | text | yes               | Plain name. `Chin Tuck`, not `Cranio-cervical flexion` |
+| `name_ar` | text | no                | Arabic phase                                           |
+| `type`    | enum | yes for exercises | See list below. Blank for stretches.                   |
 
 `type` values: `range-of-motion` · `mobility` · `isometric` · `concentric` · `eccentric` · `isokinetic` · `stabilisation` · `activation` · `offloading` · `strengthening` · `functional`
 
@@ -62,14 +62,14 @@ This drives the coloured chip on the card and tells the patient at a glance what
 
 Written for a patient alone at home. Short sentences. Second person. No abbreviations.
 
-| Column | Type | Required | Notes |
-|---|---|---|---|
-| `start_position_en` | text | yes | Where the body starts. `Sit upright with both feet flat on the floor.` |
-| `movement_en` | text | yes | What to do. One or two sentences. |
-| `direction_en` | text | stretches: yes | Which way the movement goes. `Tilt your head toward your right shoulder.` |
-| `return_en` | text | exercises: yes | How to come back. `Slowly lower to the starting position.` |
-| `safety_en` | text | yes | One line. `Stop if you feel sharp pain or pins and needles.` |
-| `target_muscles_en` | text | yes | Plain names. `Upper trapezius`. Avoid Latin-only terms. |
+| Column              | Type | Required       | Notes                                                                     |
+| ------------------- | ---- | -------------- | ------------------------------------------------------------------------- |
+| `start_position_en` | text | yes            | Where the body starts. `Sit upright with both feet flat on the floor.`    |
+| `movement_en`       | text | yes            | What to do. One or two sentences.                                         |
+| `direction_en`      | text | stretches: yes | Which way the movement goes. `Tilt your head toward your right shoulder.` |
+| `return_en`         | text | exercises: yes | How to come back. `Slowly lower to the starting position.`                |
+| `safety_en`         | text | yes            | One line. `Stop if you feel sharp pain or pins and needles.`              |
+| `target_muscles_en` | text | yes            | Plain names. `Upper trapezius`. Avoid Latin-only terms.                   |
 
 Each has an `_ar` twin: `start_position_ar`, `movement_ar`, `direction_ar`, `return_ar`, `safety_ar`, `target_muscles_ar`. All empty until the Arabic phase.
 
@@ -77,34 +77,34 @@ Each has an `_ar` twin: `start_position_ar`, `movement_ar`, `direction_ar`, `ret
 
 At least one of `hold_seconds` or `reps` must be present, or the row fails validation. An exercise with no dosage is not an instruction, it's a suggestion.
 
-| Column | Type | Required | Notes |
-|---|---|---|---|
-| `hold_seconds` | integer | conditional | `30`. Blank if not a hold. |
-| `reps` | integer | conditional | `10` |
-| `sets` | integer | no | `3`. Blank means one set. |
-| `rest_seconds` | integer | no | Between sets |
-| `each_side` | boolean | no | `TRUE` renders "each side" |
-| `frequency_en` | text | no | `Twice a day`. Free text, kept short. |
+| Column         | Type    | Required    | Notes                                 |
+| -------------- | ------- | ----------- | ------------------------------------- |
+| `hold_seconds` | integer | conditional | `30`. Blank if not a hold.            |
+| `reps`         | integer | conditional | `10`                                  |
+| `sets`         | integer | no          | `3`. Blank means one set.             |
+| `rest_seconds` | integer | no          | Between sets                          |
+| `each_side`    | boolean | no          | `TRUE` renders "each side"            |
+| `frequency_en` | text    | no          | `Twice a day`. Free text, kept short. |
 
 The card renders dosage from these fields, so it reads the same everywhere. Do not write dosage into the instruction text.
 
 ### Image
 
-| Column | Type | Required | Notes |
-|---|---|---|---|
-| `image_id` | slug | yes | Matches a file in `src/assets/images/`. Convention: same as `id`. |
-| `image_alt_en` | text | yes | Describes the position for someone who cannot see it. Not decorative. |
-| `image_alt_ar` | text | no | Arabic phase |
-| `image_status` | enum | no | `pending` \| `generated` \| `approved`. Production tracking only. |
+| Column         | Type | Required | Notes                                                                 |
+| -------------- | ---- | -------- | --------------------------------------------------------------------- |
+| `image_id`     | slug | yes      | Matches a file in `src/assets/images/`. Convention: same as `id`.     |
+| `image_alt_en` | text | yes      | Describes the position for someone who cannot see it. Not decorative. |
+| `image_alt_ar` | text | no       | Arabic phase                                                          |
+| `image_status` | enum | no       | `pending` \| `generated` \| `approved`. Production tracking only.     |
 
 Optional motion fields:
 
-| Column | Type | Required | Notes |
-|---|---|---|---|
-| `motion_id` | slug | no | Stable ID for a short movement demonstration. |
-| `motion_status` | enum | no | `draft` \| `visual_review` \| `clinical_review` \| `approved` \| `rejected` \| `retired` |
-| `motion_poster_id` | slug | conditional | Required when `motion_id` is present. |
-| `motion_alt_en` | text | conditional | Describes movement and orientation without playback. |
+| Column             | Type | Required    | Notes                                                                                    |
+| ------------------ | ---- | ----------- | ---------------------------------------------------------------------------------------- |
+| `motion_id`        | slug | no          | Stable ID for a short movement demonstration.                                            |
+| `motion_status`    | enum | no          | `draft` \| `visual_review` \| `clinical_review` \| `approved` \| `rejected` \| `retired` |
+| `motion_poster_id` | slug | conditional | Required when `motion_id` is present.                                                    |
+| `motion_alt_en`    | text | conditional | Describes movement and orientation without playback.                                     |
 
 Motion is never required for publication. If present on a patient route it must be approved, muted,
 explicitly started, pausable, and consistent with reviewed instructions. Draft or rejected motion
@@ -114,11 +114,11 @@ An item with `status: published` and no approved image renders a labelled placeh
 
 ### Internal
 
-| Column | Type | Required | Notes |
-|---|---|---|---|
-| `notes_internal` | text | no | Never rendered. Use for source, rationale, review notes. |
-| `reviewed_by` | text | no | Who clinically approved this row |
-| `reviewed_date` | date | no | ISO: `2026-08-23` |
+| Column           | Type | Required | Notes                                                    |
+| ---------------- | ---- | -------- | -------------------------------------------------------- |
+| `notes_internal` | text | no       | Never rendered. Use for source, rationale, review notes. |
+| `reviewed_by`    | text | no       | Who clinically approved this row                         |
+| `reviewed_date`  | date | no       | ISO: `2026-08-23`                                        |
 
 ---
 
@@ -133,7 +133,7 @@ The build **fails** if:
 5. Neither `hold_seconds` nor `reps` is set
 6. `image_alt_en` is empty
 7. A numeric column contains non-numeric text
-8. An area has more than 8 published items *(soft cap — she asked for 4–5; more than 8 means it's become a dump rather than a protocol)*
+8. An area has more than 8 published items _(soft cap — she asked for 4–5; more than 8 means it's become a dump rather than a protocol)_
 
 The build **warns** but continues if:
 

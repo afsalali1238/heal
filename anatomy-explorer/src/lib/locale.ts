@@ -3,7 +3,7 @@ import en from '../i18n/en.json';
 type Translations = typeof en;
 
 const dictionaries: Record<string, any> = {
-  en
+  en,
 };
 
 export function getLocale(url: string | URL) {
@@ -14,7 +14,7 @@ export function getLocale(url: string | URL) {
 
 export function useTranslations(lang: string) {
   const dict = dictionaries[lang] || dictionaries.en;
-  
+
   return function t(key: keyof Translations, ...args: string[]) {
     let str = dict[key] || en[key] || key;
     args.forEach((arg, i) => {

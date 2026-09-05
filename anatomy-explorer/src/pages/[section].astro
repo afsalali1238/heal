@@ -12,8 +12,16 @@
  */
 import Base from '../layouts/Base.astro';
 import BackLink from '../components/BackLink.astro';
+import RegionFigure from '../components/anatomy/RegionFigure.astro';
 import { getPublishedAreas, getPublishedItemCount } from '../lib/library';
-import { SECTIONS, SECTION_COPY, areaPath, isSection, type Section } from '../lib/section';
+import {
+  SECTIONS,
+  SECTION_COPY,
+  areaPath,
+  isSection,
+  itemCountLabel,
+  type Section,
+} from '../lib/section';
 
 export async function getStaticPaths() {
   return SECTIONS.map((section) => ({ params: { section } }));
@@ -30,7 +38,7 @@ const cards = await Promise.all(
   live.map(async (area) => ({
     ...area,
     count: await getPublishedItemCount(section, area.area_id),
-  })),
+  }))
 );
 ---
 
@@ -43,64 +51,167 @@ const cards = await Promise.all(
   </div>
 
   <div class="areas">
-    {cards.map((area) => (
-      <a href={areaPath(section, area.area_id)} class="area">
-        <span class="area-name">{area.name_en}</span>
-        <span class="n">{area.count} {area.count === 1 ? copy.itemNoun : `${copy.itemNoun}s`}</span>
-      </a>
-    ))}
+    {
+      cards.map((area, index) => (
+        <a href={areaPath(section, area.area_id)} class="area" data-reveal={Math.min(index, 3)}>
+          <span class="area-figure" aria-hidden="true">
+            <RegionFigure areaId={area.area_id} zoom />
+          </span>
+          <span class="area-body">
+            <span class="area-name">{area.name_en}</span>
+            <span class="n">{itemCountLabel(section, area.count)}</span>
+          </span>
+          <span class="area-go" aria-hidden="true">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </span>
+        </a>
+      ))
+    }
   </div>
 
-  {cards.length === 0 && (
-    <p class="empty">
-      Nothing has been published in this section yet. Your physiotherapist adds
-      areas here as they are reviewed.
-    </p>
-  )}
+  {
+    cards.length === 0 && (
+      <p class="empty">
+        Nothing has been published in this section yet. Your physiotherapist adds areas here as they
+        are reviewed.
+      </p>
+    )
+  }
 </Base>
 
 <style>
-.hero { padding: 8px 0 24px; }
-.hero h1 {
-  font-family: var(--f-display);
-  font-weight: 700;
-  font-size: calc(clamp(28px, 7.5vw, 40px) * var(--scale));
-  line-height: 1.08;
-  letter-spacing: -.02em;
-  margin: 0 0 10px;
-  text-wrap: balance;
-}
-.hero p { margin: 0; color: var(--ink-2); max-width: 56ch; font-size: calc(17px * var(--scale)); }
+  .hero {
+    padding: 8px 0 24px;
+  }
+  .hero h1 {
+    font-family: var(--f-display);
+    font-weight: 700;
+    font-size: calc(clamp(28px, 7.5vw, 40px) * var(--scale));
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .hero p {
+    margin: 0;
+    color: var(--ink-2);
+    max-width: 56ch;
+    font-size: calc(17px * var(--scale));
+  }
 
-.areas { display: grid; gap: 9px; grid-template-columns: 1fr; margin-top: 10px; }
-@media (min-width: 560px) { .areas { grid-template-columns: 1fr 1fr; } }
+  .areas {
+    display: grid;
+    gap: 9px;
+    grid-template-columns: 1fr;
+    margin-top: 10px;
+  }
+  @media (min-width: 560px) {
+    .areas {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
 
-.area {
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
-  padding: 15px 17px; text-decoration: none; color: inherit; min-height: 62px;
-  font-size: calc(17.5px * var(--scale)); font-weight: 600;
-  transition: border-color .12s ease;
-}
-.area:hover { border-color: var(--line-2); }
-.area:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
-.area .n {
-  font-family: var(--f-mono); font-size: calc(12px * var(--scale)); color: var(--ink-3);
-  font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap;
-}
-.area.soon { background: transparent; border-style: dashed; color: var(--ink-3); font-weight: 500; }
-.area.soon:hover { border-color: var(--line); }
-.area.soon .n {
-  font-size: calc(11px * var(--scale)); letter-spacing: .08em; text-transform: uppercase;
-  font-family: var(--f-display);
-}
+  .area {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 13px 17px;
+    text-decoration: none;
+    color: inherit;
+    min-height: 78px;
+    font-size: calc(17.5px * var(--scale));
+    font-weight: 600;
+  }
+  .area-figure {
+    inline-size: 42px;
+    block-size: 62px;
+    flex: none;
+    display: grid;
+    place-items: center;
+  }
+  .area-figure :global(.figure) {
+    block-size: 100%;
+  }
+  .area-body {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+  }
+  .area-go {
+    color: var(--ink-3);
+    display: grid;
+    place-items: center;
+    transition: transform var(--dur-2, 220ms) var(--ease-out, ease-out);
+  }
+  .area-go svg {
+    inline-size: 19px;
+    block-size: 19px;
+  }
+  .area:hover {
+    border-color: var(--brand);
+  }
+  @media (hover: hover) {
+    .area:hover .area-go {
+      transform: translateX(3px);
+      color: var(--brand);
+    }
+    .area:hover :global(.body-region path) {
+      opacity: 0.62;
+    }
+  }
+  .area:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .area .n {
+    font-family: var(--f-mono);
+    font-size: calc(12px * var(--scale));
+    color: var(--ink-3);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .area.soon {
+    background: transparent;
+    border-style: dashed;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .area.soon:hover {
+    border-color: var(--line);
+  }
+  .area.soon .n {
+    font-size: calc(11px * var(--scale));
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--f-display);
+  }
 
-.empty {
-  margin: 18px 0 0; padding: 16px 18px; border: 1px dashed var(--line);
-  border-radius: 12px; color: var(--ink-2); font-size: calc(15.5px * var(--scale));
-}
+  .empty {
+    margin: 18px 0 0;
+    padding: 16px 18px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    color: var(--ink-2);
+    font-size: calc(15.5px * var(--scale));
+  }
 
-@media (prefers-reduced-motion: reduce) {
-  .area { transition: none; }
-}
+  @media (prefers-reduced-motion: reduce) {
+    .area {
+      transition: none;
+    }
+  }
 </style>

@@ -31,22 +31,43 @@ import type { EducationEntry } from '../../data/anatomy/education';
  * boundary `memory.md` lists as defended by a single build check.
  */
 const ORIENTATION_RULES = [
-  { id: 'definitely', pattern: /\bdefinitely\b/i, reason: 'States certainty the site cannot have.' },
-  { id: 'your-diagnosis', pattern: /\byour diagnosis\b/i, reason: 'Diagnosis language (non-negotiable #5).' },
+  {
+    id: 'definitely',
+    pattern: /\bdefinitely\b/i,
+    reason: 'States certainty the site cannot have.',
+  },
+  {
+    id: 'your-diagnosis',
+    pattern: /\byour diagnosis\b/i,
+    reason: 'Diagnosis language (non-negotiable #5).',
+  },
   { id: 'safe-for-everyone', pattern: /\bsafe for everyone\b/i, reason: 'Blanket safety claim.' },
   {
     id: 'you-have-condition',
-    pattern: /\byou have\s+(?:a|an|the)?\s*[a-z][a-z -]{2,40}(?:condition|disease|syndrome|injury|tear|strain|sprain|fracture)\b/i,
+    pattern:
+      /\byou have\s+(?:a|an|the)?\s*[a-z][a-z -]{2,40}(?:condition|disease|syndrome|injury|tear|strain|sprain|fracture)\b/i,
     reason: 'Attributes a condition to the reader — diagnosis by the back door.',
   },
 ] as const;
 
 const REQUIRED_TEXT_FIELDS: (keyof EducationEntry)[] = [
-  'id', 'regionId', 'title', 'summary', 'notADiagnosis', 'sourceOrRationale', 'version',
+  'id',
+  'regionId',
+  'title',
+  'summary',
+  'notADiagnosis',
+  'sourceOrRationale',
+  'version',
 ];
 
 const CONTENT_FIELDS: (keyof EducationEntry)[] = [
-  'title', 'summary', 'structures', 'commonDescriptions', 'whatToNotice', 'whenToSeekHelp', 'notADiagnosis',
+  'title',
+  'summary',
+  'structures',
+  'commonDescriptions',
+  'whatToNotice',
+  'whenToSeekHelp',
+  'notADiagnosis',
 ];
 
 const LIST_FIELDS = ['structures', 'commonDescriptions', 'whatToNotice', 'whenToSeekHelp'] as const;
@@ -62,7 +83,8 @@ export function validateEducationEntries(entries: readonly EducationEntry[]): st
 
   for (const entry of entries) {
     if (seenIds.has(entry.id)) errors.push(`Duplicate education id: ${entry.id}`);
-    if (seenRegions.has(entry.regionId)) errors.push(`Duplicate education region: ${entry.regionId}`);
+    if (seenRegions.has(entry.regionId))
+      errors.push(`Duplicate education region: ${entry.regionId}`);
     seenIds.add(entry.id);
     seenRegions.add(entry.regionId);
 
@@ -71,7 +93,8 @@ export function validateEducationEntries(entries: readonly EducationEntry[]): st
     }
 
     for (const field of LIST_FIELDS) {
-      if (entry[field].length === 0) errors.push(`${entry.id}: ${field} must contain at least one item`);
+      if (entry[field].length === 0)
+        errors.push(`${entry.id}: ${field} must contain at least one item`);
     }
 
     // Non-negotiable #2: never write a clinician's name or a review date onto
@@ -89,13 +112,17 @@ export function validateEducationEntries(entries: readonly EducationEntry[]): st
       // The 52 shared rules — superlatives, outcome claims, booking CTAs and
       // all 36 condition names.
       for (const v of scanText(content, String(field), COMPLIANCE_RULES)) {
-        errors.push(`${entry.id}: ${String(field)} matched "${v.match}" [${v.ruleId}] — ${v.reason}`);
+        errors.push(
+          `${entry.id}: ${String(field)} matched "${v.match}" [${v.ruleId}] — ${v.reason}`
+        );
       }
 
       for (const rule of ORIENTATION_RULES) {
         const found = content.match(rule.pattern);
         if (found) {
-          errors.push(`${entry.id}: ${String(field)} matched "${found[0]}" [${rule.id}] — ${rule.reason}`);
+          errors.push(
+            `${entry.id}: ${String(field)} matched "${found[0]}" [${rule.id}] — ${rule.reason}`
+          );
         }
       }
     }
@@ -107,6 +134,8 @@ export function validateEducationEntries(entries: readonly EducationEntry[]): st
 export function assertValidEducationEntries(entries: readonly EducationEntry[]): void {
   const errors = validateEducationEntries(entries);
   if (errors.length > 0) {
-    throw new Error(`Education content validation failed:\n${errors.map((e) => `  ✗ ${e}`).join('\n')}`);
+    throw new Error(
+      `Education content validation failed:\n${errors.map((e) => `  ✗ ${e}`).join('\n')}`
+    );
   }
 }

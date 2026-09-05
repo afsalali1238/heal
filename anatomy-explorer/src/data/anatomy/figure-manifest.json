@@ -1,0 +1,98 @@
+{
+  "ex-ankle-01.svg": {
+    "bytes": 8402,
+    "sha256": "7a9e1923255510cb82b15819459fce18f3f07536ebe783483ff616ddd90b80bd"
+  },
+  "ex-ankle-02.svg": {
+    "bytes": 8363,
+    "sha256": "8fc84acc8180255c56365591af339016f1c09e1050dca8fa304f10f7b701bed1"
+  },
+  "ex-elbow-01.svg": {
+    "bytes": 8190,
+    "sha256": "90efa79506b02fdebac559267c8a09101810226ee6f14d97de95b4c7288f1bee"
+  },
+  "ex-hip-01.svg": {
+    "bytes": 7740,
+    "sha256": "44fa5e984c3ce9d62d8d3081291acb1194bba0cb73242fa0fbe478b34a507802"
+  },
+  "ex-hip-02.svg": {
+    "bytes": 7740,
+    "sha256": "c4be653a7786906bd783cfac49d6249183060183eca9bd5db8f82ac42a367140"
+  },
+  "ex-hip-03.svg": {
+    "bytes": 10137,
+    "sha256": "160bdc505aa66fa9f07f12d75303828cb0d120b96b095d9f1d5963cb1ae775f2"
+  },
+  "ex-knee-01.svg": {
+    "bytes": 7795,
+    "sha256": "91ff95e17e1a7f27c650018b31cc5f30a8b088d6d803882c127c8a570bdf7aa5"
+  },
+  "ex-knee-02.svg": {
+    "bytes": 7764,
+    "sha256": "7ade747268d3c3c72eaa023048f6d6d4be4436dc96cef88dc5b0d7c2d845b025"
+  },
+  "ex-knee-03.svg": {
+    "bytes": 10019,
+    "sha256": "c66a892f7ae842e2face9c6a151dbdbd052d5bdfba32a260616d82f7a5b7de8d"
+  },
+  "ex-lower-back-01.svg": {
+    "bytes": 8177,
+    "sha256": "61b4d8b8056cadc614f074ca1f8827ec0f9503b52730064289495ae3d8cf2885"
+  },
+  "ex-lower-back-02.svg": {
+    "bytes": 8797,
+    "sha256": "199eaaaa51f4e06cb0a3e1f52a7e8f1c9d87e64a5035d018c93dbc528e4dff5c"
+  },
+  "ex-neck-02.svg": {
+    "bytes": 8223,
+    "sha256": "b544c3fc15da848b00b10a9f96782bceccce07bf984ae6fd78d19372e6bf4705"
+  },
+  "ex-shoulder-01.svg": {
+    "bytes": 8104,
+    "sha256": "27fca93389619914fd19d5ada3cc4bd1bec784068d1807ff9b0ff2f1165396ff"
+  },
+  "ex-wrist-01.svg": {
+    "bytes": 7837,
+    "sha256": "934aca4370d1205bd2a442e332d758e4ad059a9282b40d0714f5e774de71c05a"
+  },
+  "str-ankle-01.svg": {
+    "bytes": 8360,
+    "sha256": "a065f2b9a23cbf22fa6ce52a50d9776430e750f98c5b814336ded9a58bc0746a"
+  },
+  "str-elbow-01.svg": {
+    "bytes": 9147,
+    "sha256": "c135f39d55c200e059722d0363caf00df543b17f2152eecfbfd4a61aa174a80f"
+  },
+  "str-hip-01.svg": {
+    "bytes": 8378,
+    "sha256": "7a63d93018f53cedda431b41b5f472563f6a1cfc8f1b046df8ee3591703275ec"
+  },
+  "str-hip-02.svg": {
+    "bytes": 8633,
+    "sha256": "b683e673d4715ace8d58304f584302b5b772449d6c187298253765d9da79c25a"
+  },
+  "str-knee-01.svg": {
+    "bytes": 7919,
+    "sha256": "ff43025e0b529168eac604dcec26ceb5395eb2aaa0958ff1a2ce814c9b2ecfa2"
+  },
+  "str-knee-02.svg": {
+    "bytes": 8231,
+    "sha256": "d510aadec2659756d1ce4b911f9f5189397d8891c5485b5832f12d6b297dda3d"
+  },
+  "str-lower-back-01.svg": {
+    "bytes": 8102,
+    "sha256": "5f54e6506dc88211cc4afa35886120f9c16db629c1976e35f21ed27e930a7a06"
+  },
+  "str-lower-back-02.svg": {
+    "bytes": 8132,
+    "sha256": "b0dc414d51d8bfdb233979c704320d88116058313ce530a4dc8c21a956137b06"
+  },
+  "str-neck-01.svg": {
+    "bytes": 8233,
+    "sha256": "7fb75101a47f459e75328833c4ed30219be278818de68dfc46e7bc5e9f6ab364"
+  },
+  "str-wrist-01.svg": {
+    "bytes": 8176,
+    "sha256": "a9e2aca3d48ae4c41061da4af2e4a93ac039512f8ed88b62e3bbfc1e00732d99"
+  }
+}

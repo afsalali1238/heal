@@ -19,8 +19,8 @@ let sourceLabel = 'validated local snapshot';
 if (sheetId) {
   try {
     const { areas } = await getPreviewData(sheetId);
-    exercises = areas.filter(a => a.section === 'exercise');
-    stretching = areas.filter(a => a.section === 'stretching');
+    exercises = areas.filter((a) => a.section === 'exercise');
+    stretching = areas.filter((a) => a.section === 'stretching');
     sourceLabel = 'clinician Google Sheet';
   } catch (err: any) {
     errorMsg = err.message || 'Failed to fetch preview data from Google Sheets.';
@@ -33,21 +33,95 @@ if (sheetId) {
   exercises = areas.filter((area) => area.section === 'exercise');
   stretching = areas.filter((area) => area.section === 'stretching');
 }
+
+/**
+ * The review queue — everything drafted but not yet signed off, in one list.
+ *
+ * Before this, "review the drafts" meant walking every area page in the preview
+ * and noticing which cards said *not approved*. The queue puts the whole backlog
+ * on one screen, sorted so the rows that block a patient route come first: a
+ * published area with no published item (a dead end) outranks an extra exercise
+ * for an area that already has three.
+ */
+const allItems = (await getCollection('items')).map((entry) => entry.data);
+const drafts = allItems.filter((item: any) => item.status === 'draft');
+const publishedCounts = new Map<string, number>();
+for (const item of allItems as any[]) {
+  if (item.status !== 'published') continue;
+  const key = `${item.section}/${item.area_id}`;
+  publishedCounts.set(key, (publishedCounts.get(key) ?? 0) + 1);
+}
+const queued = drafts
+  .map((item: any) => ({
+    ...item,
+    blocking: (publishedCounts.get(`${item.section}/${item.area_id}`) ?? 0) === 0,
+  }))
+  .sort(
+    (a: any, b: any) =>
+      Number(b.blocking) - Number(a.blocking) || a.section.localeCompare(b.section)
+  );
 ---
 
 <Base title="PREVIEW | Physiotherapy Library" description="Preview of draft and published content.">
   <div class="preview-banner">PREVIEW MODE — DO NOT SHARE WITH PATIENTS</div>
-  
+
   <div class="hero">
     <h1>Preview mode</h1>
     <p>Viewing all published and draft content from the {sourceLabel}.</p>
   </div>
 
-  {!sheetId && (
-    <div class="source-notice">
-      Local review is active. Configure <code>SHEET_ID</code> only when you need to compare against the live sheet.
+  <section class="queue" aria-labelledby="queue-title">
+    <div class="queue-head">
+      <h2 class="section-title" id="queue-title">Review queue</h2>
+      <p class="queue-count">
+        {queued.length} drafted {queued.length === 1 ? 'item' : 'items'} · {
+          queued.filter((i: any) => i.blocking).length
+        } on an area with nothing published
+      </p>
     </div>
-  )}
+    <p class="queue-lede">
+      Drafted rows are generated content waiting on the physiotherapist. They render only in
+      preview, never to patients. Approve by editing the row in the Google Sheet and re-running
+      <code>npm run sync:content</code>; do not flip <code>status</code> in the generated JSON.
+    </p>
+
+    {
+      queued.length === 0 ? (
+        <p class="queue-empty">
+          Nothing is waiting. Every row in the snapshot is published or retired.
+        </p>
+      ) : (
+        <ul class="queue-list">
+          {queued.map((item: any) => (
+            <li class:list={['queue-row', { 'is-blocking': item.blocking }]}>
+              <a class="queue-main" href={`/preview/${item.section}/${item.area_id}/#${item.id}`}>
+                <span class="queue-name">{item.name_en}</span>
+                <span class="queue-meta">
+                  {item.section === 'stretching' ? 'Stretching' : 'Exercise'} · {item.area_id}
+                  {item.type ? ` · ${item.type}` : ''}
+                </span>
+              </a>
+              <span class="queue-flags">
+                {item.blocking && <em class="flag flag-block">Area has no published items</em>}
+                {item.image_status === 'generated' && <em class="flag">Figure generated</em>}
+                {item.image_status === 'pending' && <em class="flag">No figure</em>}
+                {!item.reviewed_by && <em class="flag flag-warn">Unreviewed</em>}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </section>
+
+  {
+    !sheetId && (
+      <div class="source-notice">
+        Local review is active. Configure <code>SHEET_ID</code> only when you need to compare
+        against the live sheet.
+      </div>
+    )
+  }
 
   <section class="mb-4" aria-labelledby="visual-preview-title">
     <h2 class="section-title" id="visual-preview-title">Visual prototypes</h2>
@@ -69,43 +143,73 @@ if (sheetId) {
     </div>
   </section>
 
-  {errorMsg ? (
-    <div class="setup-notice">
-      <h2>Google Sheet Fetch Error</h2>
-      <p>{errorMsg}</p>
-    </div>
-  ) : (
-    <>
-      <section class="mb-4">
-        <h2 class="section-title">Stretching</h2>
-        <div class="grid">
-          {stretching.map((area: Area) => (
-            <a href={`/preview/stretching/${area.area_id}`} class="choice">
-              <span>{area.name_en} {area.status === 'draft' ? '(Draft)' : ''}</span>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rtl-flip"><path d="m9 18 6-6-6-6"/></svg>
-            </a>
-          ))}
-        </div>
-      </section>
+  {
+    errorMsg ? (
+      <div class="setup-notice">
+        <h2>Google Sheet Fetch Error</h2>
+        <p>{errorMsg}</p>
+      </div>
+    ) : (
+      <>
+        <section class="mb-4">
+          <h2 class="section-title">Stretching</h2>
+          <div class="grid">
+            {stretching.map((area: Area) => (
+              <a href={`/preview/stretching/${area.area_id}`} class="choice">
+                <span>
+                  {area.name_en} {area.status === 'draft' ? '(Draft)' : ''}
+                </span>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="rtl-flip"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </a>
+            ))}
+          </div>
+        </section>
 
-      <section class="mb-4">
-        <h2 class="section-title">Exercises</h2>
-        <div class="grid">
-          {exercises.map((area: Area) => (
-            <a href={`/preview/exercise/${area.area_id}`} class="choice">
-              <span>{area.name_en} {area.status === 'draft' ? '(Draft)' : ''}</span>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rtl-flip"><path d="m9 18 6-6-6-6"/></svg>
-            </a>
-          ))}
-        </div>
-      </section>
-    </>
-  )}
+        <section class="mb-4">
+          <h2 class="section-title">Exercises</h2>
+          <div class="grid">
+            {exercises.map((area: Area) => (
+              <a href={`/preview/exercise/${area.area_id}`} class="choice">
+                <span>
+                  {area.name_en} {area.status === 'draft' ? '(Draft)' : ''}
+                </span>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="rtl-flip"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </a>
+            ))}
+          </div>
+        </section>
+      </>
+    )
+  }
 </Base>
 
 <style>
   .preview-banner {
-    background: #DC2626;
+    background: #dc2626;
     color: white;
     text-align: center;
     font-weight: 700;
@@ -113,20 +217,159 @@ if (sheetId) {
     padding: 8px;
     letter-spacing: 0.05em;
   }
-  .mb-4 { margin-bottom: 24px; }
-  .section-title { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 16px; }
-  .grid { display: flex; flex-direction: column; gap: 12px; }
+  .mb-4 {
+    margin-bottom: 24px;
+  }
+
+  .queue {
+    margin: 4px 0 26px;
+    padding: 16px 18px 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  .queue-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .queue .section-title {
+    margin-bottom: 4px;
+  }
+  .queue-count {
+    margin: 0;
+    font-family: var(--f-mono);
+    font-size: 12.5px;
+    color: var(--ink-3);
+  }
+  .queue-lede {
+    margin: 8px 0 12px;
+    font-size: 14.5px;
+    color: var(--ink-2);
+    line-height: 1.5;
+    max-width: 78ch;
+  }
+  .queue-lede code,
+  .queue-list code {
+    font-family: var(--f-mono);
+    background: var(--surface-2);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.92em;
+  }
+  .queue-empty {
+    color: var(--ink-2);
+    font-size: 15px;
+    padding-bottom: 12px;
+  }
+  .queue-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1px;
+    background: var(--line);
+    border-block-start: 1px solid var(--line);
+  }
+  .queue-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--surface);
+    padding: 10px 4px;
+    flex-wrap: wrap;
+  }
+  .queue-row.is-blocking {
+    background: #fffbeb;
+  }
+  .queue-main {
+    display: grid;
+    gap: 2px;
+    text-decoration: none;
+    color: inherit;
+    min-width: 0;
+  }
+  .queue-main:hover .queue-name {
+    color: var(--brand);
+  }
+  .queue-name {
+    font-weight: 600;
+    font-size: 16.5px;
+  }
+  .queue-meta {
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  .queue-flags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .flag {
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    border: 1px solid var(--line);
+  }
+  .flag-warn {
+    background: var(--warn-bg);
+    color: var(--warn);
+    border-color: transparent;
+  }
+  .flag-block {
+    background: #fee2e2;
+    color: #991b1b;
+    border-color: transparent;
+    font-weight: 600;
+  }
+  .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+  .grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
   .choice {
-    display: flex; justify-content: space-between; align-items: center;
-    background: var(--surface); color: var(--ink);
-    border: 1px solid var(--line); border-radius: 12px;
-    padding: 16px 20px; font-weight: 600; font-size: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-weight: 600;
+    font-size: 18px;
     text-decoration: none;
   }
-  .choice:hover { border-color: var(--brand); color: var(--brand); }
-  .choice > span:first-child { display: grid; gap: 4px; }
-  .choice strong { font: inherit; }
-  .choice small { color: var(--ink-2); font-size: calc(13px * var(--scale)); font-weight: 400; }
+  .choice:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+  }
+  .choice > span:first-child {
+    display: grid;
+    gap: 4px;
+  }
+  .choice strong {
+    font: inherit;
+  }
+  .choice small {
+    color: var(--ink-2);
+    font-size: calc(13px * var(--scale));
+    font-weight: 400;
+  }
   .prototype-chip {
     flex: none;
     border: 1px solid #b45309;
@@ -136,7 +379,7 @@ if (sheetId) {
     padding: 5px 9px;
     font-size: calc(11px * var(--scale));
     text-transform: uppercase;
-    letter-spacing: .06em;
+    letter-spacing: 0.06em;
   }
 
   .setup-notice {

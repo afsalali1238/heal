@@ -1,38 +1,56 @@
+/**
+ * Deprecated prototype, kept for eyeballing only. Superseded by `src/lib/anatomy/poses.ts`
+ * (per-row movement plans), `src/lib/anatomy/movement.ts` (the kinematics) and
+ * `scripts/render-movement-figures.ts`, which `scripts/check-poses.ts` gates against the sheet.
+ * Nothing in the build reads either file. Do not author poses here: a second pose table is how
+ * a figure starts disagreeing with the sentence printed underneath it.
+ */
 // Prototype harness: render the real published items as posed figures and look at them.
 // Not part of the build. A-006's rule — render it and look at it.
 import { writeFileSync } from 'node:fs';
 import { register } from 'node:module';
 
-const { buildFigure, limbPath, torsoPath, tweenPose } = await import('../src/lib/anatomy/geometry/pose.ts');
+const { buildFigure, limbPath, torsoPath, tweenPose } =
+  await import('../src/lib/anatomy/geometry/pose.ts');
 
 // Poses drafted from the clinician's OWN movement text for each published item.
 const ITEMS = [
   {
-    id: 'ex-neck-02', name: 'Chin Tuck', view: 'side',
+    id: 'ex-neck-02',
+    name: 'Chin Tuck',
+    view: 'side',
     movement: 'Draw your chin straight back, as if making a double chin.',
     start: { chinSlide: 14, trunk: 2 },
     end: { chinSlide: -10, trunk: 2 },
   },
   {
-    id: 'str-neck-01', name: 'Side Neck Stretch', view: 'front',
+    id: 'str-neck-01',
+    name: 'Side Neck Stretch',
+    view: 'front',
     movement: 'Let your right ear drop slowly towards your right shoulder.',
     start: { head: 0 },
     end: { head: -34 },
   },
   {
-    id: 'ex-neck-01', name: 'Neck Range of Motion', view: 'side',
+    id: 'ex-neck-01',
+    name: 'Neck Range of Motion',
+    view: 'side',
     movement: 'Slowly move your head in one direction at a time.',
     start: { head: 0 },
     end: { head: 32 },
   },
   {
-    id: 'ex-shoulder-01', name: 'Shoulder Rolls', view: 'front',
+    id: 'ex-shoulder-01',
+    name: 'Shoulder Rolls',
+    view: 'front',
     movement: 'Roll your shoulders up, back and down in a smooth circle.',
     start: { shoulderL: 8, shoulderR: 8 },
     end: { shoulderL: 34, shoulderR: 34, elbowL: 22, elbowR: 22 },
   },
   {
-    id: 'str-neck-02', name: 'Levator Scapulae Stretch', view: 'front',
+    id: 'str-neck-02',
+    name: 'Levator Scapulae Stretch',
+    view: 'front',
     movement: 'Look down towards your right armpit.',
     start: { head: 0 },
     end: { head: -26, shoulderL: 88, elbowL: 128 },
@@ -46,7 +64,10 @@ const ACCENT = '#0ea5e9';
 function figureSvg(pose, view, colour, opacity = 1) {
   const f = buildFigure(pose, view);
   const limbs = f.limbs
-    .map((l) => `<path d="${limbPath(l.points)}" stroke="${colour}" stroke-width="${l.width}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`)
+    .map(
+      (l) =>
+        `<path d="${limbPath(l.points)}" stroke="${colour}" stroke-width="${l.width}" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`
+    )
     .join('');
   return `<g opacity="${opacity}">
     ${limbs}
@@ -61,7 +82,7 @@ function card(item) {
   const a = buildFigure(item.start, item.view);
   const b = buildFigure(item.end, item.view);
   const arrow = `<defs><marker id="ah-${item.id}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="${ACCENT}"/></marker></defs>
-    <path d="M${a.headCentre[0].toFixed(1)} ${(a.headCentre[1] - 46).toFixed(1)} Q ${((a.headCentre[0]+b.headCentre[0])/2).toFixed(1)} ${(Math.min(a.headCentre[1],b.headCentre[1]) - 74).toFixed(1)} ${b.headCentre[0].toFixed(1)} ${(b.headCentre[1] - 46).toFixed(1)}"
+    <path d="M${a.headCentre[0].toFixed(1)} ${(a.headCentre[1] - 46).toFixed(1)} Q ${((a.headCentre[0] + b.headCentre[0]) / 2).toFixed(1)} ${(Math.min(a.headCentre[1], b.headCentre[1]) - 74).toFixed(1)} ${b.headCentre[0].toFixed(1)} ${(b.headCentre[1] - 46).toFixed(1)}"
       stroke="${ACCENT}" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#ah-${item.id})"/>`;
 
   return `<figure style="margin:0">
@@ -77,7 +98,10 @@ function card(item) {
 // A strip of interpolated frames — the animation question, shown as frames.
 function strip(item) {
   const frames = [0, 0.25, 0.5, 0.75, 1]
-    .map((t) => `<svg viewBox="20 30 200 570" width="96">${figureSvg(tweenPose(item.start, item.end, t), item.view, INK)}</svg>`)
+    .map(
+      (t) =>
+        `<svg viewBox="20 30 200 570" width="96">${figureSvg(tweenPose(item.start, item.end, t), item.view, INK)}</svg>`
+    )
     .join('');
   return `<div class="strip"><h3>${item.name} — interpolated frames</h3><div class="frames">${frames}</div></div>`;
 }

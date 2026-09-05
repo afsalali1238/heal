@@ -1,6 +1,11 @@
 /**
  * A posable figure, driven by joint ANGLES rather than coordinates.
  *
+ * Not used by the build. The patient-facing figures come from
+ * `src/lib/anatomy/poses.ts` + `movement.ts` and are gated by `scripts/check-poses.ts`;
+ * this module is the earlier prototype, kept because the geometry it derives is still
+ * the clearest way to eyeball a joint chain. Do not author shipped poses here.
+ *
  * ── Why angles, and why this exists ────────────────────────────────────────
  * D-015 rejected AI-generated demonstration images after five of nine came back
  * clinically wrong — and, the part that matters, **all nine looked professional**.
@@ -62,10 +67,14 @@ const LIMITS: Record<keyof PoseAngles, readonly [number, number]> = {
   head: [-55, 55],
   chinSlide: [-14, 18],
   trunk: [-40, 60],
-  shoulderL: [-20, 180], shoulderR: [-20, 180],
-  elbowL: [0, 150], elbowR: [0, 150],
-  hipL: [-25, 120], hipR: [-25, 120],
-  kneeL: [0, 140], kneeR: [0, 140],
+  shoulderL: [-20, 180],
+  shoulderR: [-20, 180],
+  elbowL: [0, 150],
+  elbowR: [0, 150],
+  hipL: [-25, 120],
+  hipR: [-25, 120],
+  kneeL: [0, 140],
+  kneeR: [0, 140],
 };
 
 export function clampPose(pose: PoseAngles): PoseAngles {
@@ -84,7 +93,8 @@ export function poseViolations(pose: PoseAngles): string[] {
   for (const [key, value] of Object.entries(pose) as [keyof PoseAngles, number][]) {
     if (value === undefined) continue;
     const [lo, hi] = LIMITS[key];
-    if (value < lo || value > hi) out.push(`${key}=${value}° is outside the anatomical range ${lo}..${hi}`);
+    if (value < lo || value > hi)
+      out.push(`${key}=${value}° is outside the anatomical range ${lo}..${hi}`);
   }
   return out;
 }
@@ -194,10 +204,15 @@ export function buildFigure(rawPose: PoseAngles, view: PoseView): PosedFigure {
   // wedge that read as a dress.
   const sw = side ? 15 : 30;
   const hw = side ? 14 : 23;
-  const sx = neckBase[0], sy = neckBase[1] + 6;
-  const hx = pelvis[0], hy = pelvis[1] + 4;
+  const sx = neckBase[0],
+    sy = neckBase[1] + 6;
+  const hx = pelvis[0],
+    hy = pelvis[1] + 4;
   const torso: Point[] = [
-    [sx - sw, sy], [sx + sw, sy], [hx + hw, hy], [hx - hw, hy],
+    [sx - sw, sy],
+    [sx + sw, sy],
+    [hx + hw, hy],
+    [hx - hw, hy],
   ];
 
   return { view, headCentre: head, headRadius: SEG.headR * 0.6, limbs, torso };
@@ -205,7 +220,9 @@ export function buildFigure(rawPose: PoseAngles, view: PoseView): PosedFigure {
 
 /** SVG path for one limb chain. */
 export function limbPath(points: readonly Point[]): string {
-  return points.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)} ${pt[1].toFixed(1)}`).join(' ');
+  return points
+    .map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)} ${pt[1].toFixed(1)}`)
+    .join(' ');
 }
 
 export function torsoPath(points: readonly Point[]): string {

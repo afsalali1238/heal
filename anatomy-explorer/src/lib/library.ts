@@ -46,7 +46,7 @@ export async function getPublishedAreas(section: Section): Promise<LibraryArea[]
   const populated = new Set(
     items
       .filter((item) => item.data.status === 'published')
-      .map((item) => `${item.data.section}/${item.data.area_id}`),
+      .map((item) => `${item.data.section}/${item.data.area_id}`)
   );
 
   return areas
@@ -64,7 +64,7 @@ export async function getPublishedItemCount(section: Section, areaId: string): P
     (item) =>
       item.data.section === section &&
       item.data.area_id === areaId &&
-      item.data.status === 'published',
+      item.data.status === 'published'
   ).length;
 }
 

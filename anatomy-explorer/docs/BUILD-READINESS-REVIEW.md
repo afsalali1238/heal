@@ -4,17 +4,17 @@
 
 ## Scorecard
 
-| Area | Score | Assessment |
-|---|---:|---|
-| Product concept | 9.3/10 | Clear clinic-guided handbook plus differentiated 3D discovery |
-| PRD and scope | 9.1/10 | Strong journeys, exclusions, safety, and success criteria |
-| UX definition | 8.8/10 | Core flows are clear; safety parity and search details need closure |
-| Clinical governance | 7.2/10 | Strong rules; human approvals and review metadata remain open |
-| Architecture | 8.2/10 | Appropriate static-first approach; 3D implementation contract needs proof |
-| Visual/media plan | 8.7/10 | Still-first and motion safeguards are strong |
-| Multi-agent readiness | 6.4/10 | Previous handoffs were detailed but stale and over-fragmented |
-| Build verification | 5.0/10 | Declared checks are not yet trustworthy in the installed environment |
-| Overall pre-build readiness | 8.0/10 | Start S0; do not start every module simultaneously |
+| Area                        |  Score | Assessment                                                                |
+| --------------------------- | -----: | ------------------------------------------------------------------------- |
+| Product concept             | 9.3/10 | Clear clinic-guided handbook plus differentiated 3D discovery             |
+| PRD and scope               | 9.1/10 | Strong journeys, exclusions, safety, and success criteria                 |
+| UX definition               | 8.8/10 | Core flows are clear; safety parity and search details need closure       |
+| Clinical governance         | 7.2/10 | Strong rules; human approvals and review metadata remain open             |
+| Architecture                | 8.2/10 | Appropriate static-first approach; 3D implementation contract needs proof |
+| Visual/media plan           | 8.7/10 | Still-first and motion safeguards are strong                              |
+| Multi-agent readiness       | 6.4/10 | Previous handoffs were detailed but stale and over-fragmented             |
+| Build verification          | 5.0/10 | Declared checks are not yet trustworthy in the installed environment      |
+| Overall pre-build readiness | 8.0/10 | Start S0; do not start every module simultaneously                        |
 
 ## What is complete enough to build
 

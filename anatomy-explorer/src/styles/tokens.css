@@ -11,85 +11,100 @@
  */
 :root {
   /* Scale in use: 40 / 23 / 21 / 17.5 / 17 / 15.5 / 14 / 12.5 / 11 / 10 */
-  --fs-display: 40px;   /* page h1 (clamped down on narrow viewports) */
+  --fs-display: 40px; /* page h1 (clamped down on narrow viewports) */
   --fs-h2: 23px;
-  --fs-h3: 21px;        /* card and section headings */
-  --fs-lead: 17.5px;    /* instruction prose — one notch above body */
-  --fs-body: 17px;      /* base; deliberately not 16 */
+  --fs-h3: 21px; /* card and section headings */
+  --fs-lead: 17.5px; /* instruction prose — one notch above body */
+  --fs-body: 17px; /* base; deliberately not 16 */
   --fs-small: 15.5px;
   --fs-meta: 14px;
-  --fs-label: 12.5px;   /* uppercase labels */
+  --fs-label: 12.5px; /* uppercase labels */
   --fs-micro: 11px;
   --fs-tiny: 10px;
 
-  --pad: clamp(15px, 4vw, 24px);  /* page gutter */
-  --measure: 780px;               /* single-column max width */
-  --measure-text: 56ch;           /* running text never exceeds this */
-  --r: 14px;                      /* card radius */
-  --r-inner: 11px;                /* inner elements: 10–12px */
+  --pad: clamp(15px, 4vw, 24px); /* page gutter */
+  --measure: 780px; /* single-column max width */
+  --measure-text: 56ch; /* running text never exceeds this */
+  --r: 14px; /* card radius */
+  --r-inner: 11px; /* inner elements: 10–12px */
 }
 
 :root {
-  --ground: #F3F4F6;
-  --surface: #FFFFFF;
-  --surface-2: #F9FAFB;
+  --ground: #f3f4f6;
+  --surface: #ffffff;
+  --surface-2: #f9fafb;
   --ink: #111827;
-  --ink-2: #4B5563;
-  --ink-3: #9CA3AF;
-  --line: #E5E7EB;
-  --line-2: #D1D5DB;
+  --ink-2: #4b5563;
+  --ink-3: #9ca3af;
+  --line: #e5e7eb;
+  --line-2: #d1d5db;
 
-  --brand: #0ea5e9;       /* Vibrant Sky Blue */
-  --brand-ink: #FFFFFF;
+  --brand: #0ea5e9; /* Vibrant Sky Blue */
+  --brand-ink: #ffffff;
 
-  --mobility: #3B82F6;    --mobility-bg: #DBEAFE;   /* Blue */
-  --stretch: #F59E0B;     --stretch-bg: #FEF3C7;    /* Amber */
-  --strengthen: #10B981;  --strengthen-bg: #D1FAE5; /* Emerald */
+  --mobility: #3b82f6;
+  --mobility-bg: #dbeafe; /* Blue */
+  --stretch: #f59e0b;
+  --stretch-bg: #fef3c7; /* Amber */
+  --strengthen: #10b981;
+  --strengthen-bg: #d1fae5; /* Emerald */
 
-  --warn: #B45309;        --warn-bg: #FEF3C7;       /* Warning Amber */
-  --slot: #F3F4F6;        --slot-line: #D1D5DB;
+  --warn: #b45309;
+  --warn-bg: #fef3c7; /* Warning Amber */
+  --slot: #f3f4f6;
+  --slot-line: #d1d5db;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme='light']) {
     --ground: #111827;
-    --surface: #1F2937;
+    --surface: #1f2937;
     --surface-2: #374151;
-    --ink: #F9FAFB;
-    --ink-2: #D1D5DB;
-    --ink-3: #9CA3AF;
+    --ink: #f9fafb;
+    --ink-2: #d1d5db;
+    --ink-3: #9ca3af;
     --line: #374151;
-    --line-2: #4B5563;
-    
+    --line-2: #4b5563;
+
     --brand: #38bdf8;
     --brand-ink: #0f172a;
-    
-    --mobility: #60A5FA; --mobility-bg: #1E3A8A;
-    --stretch: #FBBF24;  --stretch-bg: #78350F;
-    --strengthen: #34D399; --strengthen-bg: #064E3B;
-    
-    --warn: #FCD34D;     --warn-bg: #78350F;
-    --slot: #111827;     --slot-line: #374151;
+
+    --mobility: #60a5fa;
+    --mobility-bg: #1e3a8a;
+    --stretch: #fbbf24;
+    --stretch-bg: #78350f;
+    --strengthen: #34d399;
+    --strengthen-bg: #064e3b;
+
+    --warn: #fcd34d;
+    --warn-bg: #78350f;
+    --slot: #111827;
+    --slot-line: #374151;
   }
 }
 
-:root[data-theme="dark"] {
+:root[data-theme='dark'] {
   --ground: #111827;
-  --surface: #1F2937;
+  --surface: #1f2937;
   --surface-2: #374151;
-  --ink: #F9FAFB;
-  --ink-2: #D1D5DB;
-  --ink-3: #9CA3AF;
+  --ink: #f9fafb;
+  --ink-2: #d1d5db;
+  --ink-3: #9ca3af;
   --line: #374151;
-  --line-2: #4B5563;
-  
+  --line-2: #4b5563;
+
   --brand: #38bdf8;
   --brand-ink: #0f172a;
-  
-  --mobility: #60A5FA; --mobility-bg: #1E3A8A;
-  --stretch: #FBBF24;  --stretch-bg: #78350F;
-  --strengthen: #34D399; --strengthen-bg: #064E3B;
-  
-  --warn: #FCD34D;     --warn-bg: #78350F;
-  --slot: #111827;     --slot-line: #374151;
+
+  --mobility: #60a5fa;
+  --mobility-bg: #1e3a8a;
+  --stretch: #fbbf24;
+  --stretch-bg: #78350f;
+  --strengthen: #34d399;
+  --strengthen-bg: #064e3b;
+
+  --warn: #fcd34d;
+  --warn-bg: #78350f;
+  --slot: #111827;
+  --slot-line: #374151;
 }

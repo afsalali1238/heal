@@ -4,46 +4,49 @@ Patient-facing physiotherapy education for a clinic in the UAE: an interactive b
 in front of a clinician-reviewed stretching and exercise library. Astro, deployed on Vercel,
 content synced from the physiotherapist's Google Sheet.
 
-Two folders, and they have opposite rules.
-
-| Folder | What it is | Status |
-|---|---|---|
-| `anatomy-explorer/` | **The product.** The unified app — locator plus library, one build. | **Build here.** All new work. |
-| `patient-library/` | The live exercise and stretching site the unified app is being built from. | **Live, and reference-only.** Read it, copy out of it, never edit it. |
-
 ## Where the work is
 
-`anatomy-explorer/` is the merged product (decisions A-011, A-012, A-014). It is where every
-change goes.
+**This is a single-app repo.** `anatomy-explorer/` is the product and the whole product (decisions
+A-011, A-012, A-014): the body-area locator, the clinician-reviewed stretching and exercise library,
+the clinic hand-off screen and the content pipeline, in one build.
 
-`patient-library/` is **deployed right now** — the physiotherapist is entering clinical content
-into it and patients have been sent the link. It is not deprecated and it is not being deleted. It
-stays as the working reference and the rollback target. Treat it as a library you happen to have
-source access to: read it, learn the contract, copy code into `anatomy-explorer/`, leave the
-original alone.
+`patient-library/` was stripped for parts and **deleted**; the folder no longer exists. Any document
+that says to read from it, copy out of it, or "never delete" it is stale — see `AGENTS.md`. Git
+history is the rollback target.
 
-`anatomy-explorer/PORT-CHECKLIST.md` lists everything still to bring across, in order, with the
-known defect to fix on each. Start there.
+There is also a small asset toolkit at the root, `region-map-build/`, which generated the 2D region maps
+from the app's own geometry. It is standalone: nothing in `anatomy-explorer/` imports it.
+
+`anatomy-explorer/PORT-CHECKLIST.md` is the record of what was brought across from the old folder and
+what each item's known defect was. It is historical now; the live go/no-go list is
+`anatomy-explorer/HANDOFF.md` plus `anatomy-explorer/docs/RELEASE-CHECKLIST.md`.
 
 ## Working here
 
 `cd` into the folder you are working on. **Never run a build or install from the repository root**
 — there is no `package.json` here.
 
-**Read `AGENTS.md` before touching either folder.** It is the canonical rules file; `CLAUDE.md` and
-`GEMINI.md` beside it are pointers to it, and each folder has its own `AGENTS.md` with local
-detail. Cursor rules are in `.cursor/rules/`. The short version:
+**Read `AGENTS.md` first.** It is the canonical rules file; `CLAUDE.md` and `GEMINI.md` beside it are
+pointers to it, and `anatomy-explorer/AGENTS.md` adds local detail. Cursor rules are in
+`.cursor/rules/`. The short version:
 
 - Content lives in the Google Sheet, not the repo — `src/data/*.json` is generated.
 - Never invent clinical content. Anything clinical ships as `draft` with no reviewer named.
 - Never relax the compliance check. Fix the content instead.
 - Navigation is by body area, never by condition. No analytics, accounts or backend.
-- Neither folder is committed yet, so **never run `git clean -fd` at this root.**
+- Loose documents at this root are untracked. **Never run `git clean -fd` here** — there is nothing to
+  clean, and the flag takes the whole tree with it.
 
-## Known state, 2026-08-26
+## Known state, 2026-09-05
 
-Neither folder is tracked in git — the split was done with plain `mv` and never committed, so
-committing both trees is the first thing worth doing. `anatomy-explorer/` currently imports JSON
-directly out of `patient-library/`, which cannot deploy and needs replacing with a real port. CI
-still runs at the repository root, where there is no `package.json`, so it is red. `AGENTS.md` has
-the full picture and is kept current.
+`anatomy-explorer/` is committed and builds: `npm ci`, `npm run lint`, `npm run typecheck`,
+`npm run check:all`, `npx astro build` and `npm run crawl` all pass in a clean Linux/Node 22
+environment (see `anatomy-explorer/docs/IMPROVEMENTS-2026-09-05.md` for the exact run). CI now runs in
+that folder on Node 22 instead of at this root, where there is no `package.json`.
+
+What is **not** done is human, not technical: 24 published rows still reference 1×1 placeholder
+figures, the clinic identifiers in `src/config/clinic.ts` and the legal `approvedBy` fields are
+unfilled, the locator's safety wording and the eight drafted education entries are unsigned, and the
+site has never been opened in a browser by anyone on this pass (no browser binary is available in the
+build sandbox). `anatomy-explorer/HANDOFF.md` and `docs/RELEASE-CHECKLIST.md` carry the current
+go/no-go list.

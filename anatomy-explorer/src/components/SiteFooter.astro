@@ -57,71 +57,101 @@ const phone = identifier(CLINIC.phone);
 <footer class="foot">
   <div class="foot__inner">
     {/* 4. Emergency clause — first, and visually strongest. */}
-    {disclaimer?.data.emergencyLine && (
-      <p class="foot__emergency">
-        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
-          <path d="M12 9v4" /><path d="M12 17h.01" />
-        </svg>
-        <span>
-          {disclaimer.data.emergencyLine}
-          <b>{CLINIC.emergencyNumbers}</b>.
-        </span>
-      </p>
-    )}
+    {
+      disclaimer?.data.emergencyLine && (
+        <p class="foot__emergency">
+          <svg
+            aria-hidden="true"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+            <>
+              <path d="M12 9v4" />
+              <path d="M12 17h.01" />
+            </>
+          </svg>
+          <span>
+            {disclaimer.data.emergencyLine}
+            <b>{CLINIC.emergencyNumbers}</b>.
+          </span>
+        </p>
+      )
+    }
 
     {/* 3. Stop-and-contact condition. */}
-    {disclaimer?.data.stopContactLine && (
-      <p class="foot__stop">
-        {disclaimer.data.stopContactLine}
-        {phone && <> Call the clinic on <a href={`tel:${phone.replace(/\s+/g, '')}`}>{phone}</a>.</>}
-      </p>
-    )}
+    {
+      disclaimer?.data.stopContactLine && (
+        <p class="foot__stop">
+          {disclaimer.data.stopContactLine}
+          {phone && (
+            <>
+              {' '}
+              Call the clinic on <a href={`tel:${phone.replace(/\s+/g, '')}`}>{phone}</a>.
+            </>
+          )}
+        </p>
+      )
+    }
 
     {/* 1. Educational only. */}
     {disclaimer?.data.educationalLine && <p class="foot__edu">{disclaimer.data.educationalLine}</p>}
 
     {/* 2, 5, 6. The full notice, on the page but collapsed. */}
-    {Body && (
-      <details class="foot__more">
-        <summary>{disclaimer?.data.title ?? 'Full notice'}</summary>
-        <div class="foot__prose"><Body /></div>
-      </details>
-    )}
+    {
+      Body && (
+        <details class="foot__more">
+          <summary>{disclaimer?.data.title ?? 'Full notice'}</summary>
+          <div class="foot__prose">
+            <Body />
+          </div>
+        </details>
+      )
+    }
 
-    {/*
+    {
+      /*
       A collapsed <details> does not reliably expand when printed — the content
       lives in a UA shadow slot that print stylesheets cannot force open across
       browsers. Rather than reach for JavaScript, the notice is repeated in a
       block that is hidden on screen and shown only on paper, so a printed
       handout always carries the full disclaimer.
-    */}
-    {Body && (
-      <div class="foot__printonly foot__prose" aria-hidden="true">
-        <h2>{disclaimer?.data.title ?? 'Full notice'}</h2>
-        <Body />
-      </div>
-    )}
+    */
+    }
+    {
+      Body && (
+        <div class="foot__printonly foot__prose" aria-hidden="true">
+          <h2>{disclaimer?.data.title ?? 'Full notice'}</h2>
+          <Body />
+        </div>
+      )
+    }
 
     {/* 7. Clinic and licence identifiers. */}
     <dl class="foot__ids">
-      {identifiers.map((row) => (
-        <div>
-          <dt>{row.label}</dt>
-          <dd>{row.value ?? <span class="foot__gap">not yet supplied</span>}</dd>
-        </div>
-      ))}
+      {
+        identifiers.map((row) => (
+          <div>
+            <dt>{row.label}</dt>
+            <dd>{row.value ?? <span class="foot__gap">not yet supplied</span>}</dd>
+          </div>
+        ))
+      }
     </dl>
 
     <nav class="foot__nav" aria-label="Legal">
-      {legalPages.map((page) => (
-        <a href={`/legal/${page.id}/`}>{page.data.title}</a>
-      ))}
+      {legalPages.map((page) => <a href={`/legal/${page.id}/`}>{page.data.title}</a>)}
     </nav>
 
     {/* 8. Copyright. */}
     <p class="foot__copy">
-      {`© ${CLINIC.copyrightYear}${identifier(CLINIC.legalName) ? ` ${CLINIC.legalName}` : ''}. All rights reserved.`}
+      {
+        `© ${CLINIC.copyrightYear}${identifier(CLINIC.legalName) ? ` ${CLINIC.legalName}` : ''}. All rights reserved.`
+      }
     </p>
   </div>
 </footer>

@@ -8,10 +8,7 @@ import Base from '../layouts/Base.astro';
 import BackLink from '../components/BackLink.astro';
 import { SECTION_COPY, areaPath } from '../lib/section';
 
-const [areas, items] = await Promise.all([
-  getCollection('areas'),
-  getCollection('items'),
-]);
+const [areas, items] = await Promise.all([getCollection('areas'), getCollection('items')]);
 
 const publishedAreas = areas
   .filter((a) => a.data.status === 'published')
@@ -22,11 +19,14 @@ const publishedItems = items
   .sort((a, b) => a.data.order - b.data.order);
 
 // Build structured catalog by area and section
-const areaMap = new Map<string, {
-  area: typeof publishedAreas[0]['data'];
-  stretches: typeof publishedItems;
-  exercises: typeof publishedItems;
-}>();
+const areaMap = new Map<
+  string,
+  {
+    area: (typeof publishedAreas)[0]['data'];
+    stretches: typeof publishedItems;
+    exercises: typeof publishedItems;
+  }
+>();
 
 for (const a of publishedAreas) {
   const areaKey = a.data.area_id;
@@ -62,15 +62,32 @@ const catalog = Array.from(areaMap.values()).filter(
   <BackLink href="/" label="Back to Handbook Home" />
 
   <div class="clinic-header">
+    <img
+      class="clinic-art"
+      src="/anatomy/illustrations/clinic-handoff.webp"
+      alt=""
+      width="1280"
+      height="714"
+      decoding="async"
+    />
     <div class="badge">Clinic Mode</div>
     <h1>Physiotherapist Handoff</h1>
     <p class="lede">
-      Select an exercise or body area to share with your patient via direct link, QR code, or printed handout.
+      Select an exercise or body area to share with your patient via direct link, QR code, or
+      printed handout.
     </p>
   </div>
 
   <div class="search-bar">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="search-icon">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      class="search-icon"
+    >
       <circle cx="11" cy="11" r="8"></circle>
       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
     </svg>
@@ -84,188 +101,259 @@ const catalog = Array.from(areaMap.values()).filter(
   </div>
 
   <div id="clinicCatalog" class="clinic-catalog">
-    {catalog.map((entry) => (
-      <section class="area-block" data-area-name={entry.area.name_en.toLowerCase()}>
-        <header class="area-block-head">
-          <div class="area-info">
-            <span class="crumb">Body Area</span>
-            <h2>{entry.area.name_en}</h2>
-          </div>
-          <div class="area-actions">
-            <button
-              type="button"
-              class="btn-action btn-share-area"
-              data-name={`${entry.area.name_en} Area Handbook`}
-              data-url={`/area/${entry.area.area_id}`}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="7"></rect>
-                <rect x="14" y="3" width="7" height="7"></rect>
-                <rect x="14" y="14" width="7" height="7"></rect>
-                <rect x="3" y="14" width="7" height="7"></rect>
-              </svg>
-              <span>QR & Link</span>
-            </button>
-            <a href={`/area/${entry.area.area_id}`} class="btn-action btn-view" target="_blank" rel="noopener">
-              <span>View Area</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <line x1="10" y1="14" x2="21" y2="3"></line>
-              </svg>
-            </a>
-          </div>
-        </header>
-
-        {entry.stretches.length > 0 && (
-          <div class="section-group">
-            <h3 class="section-heading">Stretching ({entry.stretches.length})</h3>
-            <div class="items-grid">
-              {entry.stretches.map((item) => {
-                const targetUrl = `${areaPath('stretching', item.data.area_id)}#${item.data.id}`;
-                return (
-                  <article
-                    class="clinic-card"
-                    data-search={`${entry.area.name_en} ${item.data.name_en} stretching ${item.data.type || ''}`.toLowerCase()}
-                  >
-                    <div class="card-top">
-                      {item.data.type && <span class={`chip ${item.data.type}`}>{item.data.type.replace(/-/g, ' ')}</span>}
-                      <h4>{item.data.name_en}</h4>
-                    </div>
-
-                    <div class="card-dose">
-                      {item.data.hold_seconds && <span>Hold: {item.data.hold_seconds}s</span>}
-                      {item.data.reps && <span>Reps: {item.data.reps}</span>}
-                      {item.data.sets && <span>Sets: {item.data.sets}</span>}
-                    </div>
-
-                    <div class="card-actions">
-                      <button
-                        type="button"
-                        class="btn-card-action btn-copy-link"
-                        data-url={targetUrl}
-                        title="Copy direct exercise link"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                        <span>Copy</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        class="btn-card-action btn-show-qr"
-                        data-name={item.data.name_en}
-                        data-url={targetUrl}
-                        title="Show QR Code"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <rect x="3" y="3" width="7" height="7"></rect>
-                          <rect x="14" y="3" width="7" height="7"></rect>
-                          <rect x="14" y="14" width="7" height="7"></rect>
-                          <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                        <span>QR</span>
-                      </button>
-
-                      <a
-                        href={targetUrl}
-                        class="btn-card-action btn-open-target"
-                        target="_blank"
-                        rel="noopener"
-                        title="Open in patient view"
-                      >
-                        <span>Open</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                          <polyline points="15 3 21 3 21 9"></polyline>
-                          <line x1="10" y1="14" x2="21" y2="3"></line>
-                        </svg>
-                      </a>
-                    </div>
-                  </article>
-                );
-              })}
+    {
+      catalog.map((entry) => (
+        <section class="area-block" data-area-name={entry.area.name_en.toLowerCase()}>
+          <header class="area-block-head">
+            <div class="area-info">
+              <span class="crumb">Body Area</span>
+              <h2>{entry.area.name_en}</h2>
             </div>
-          </div>
-        )}
-
-        {entry.exercises.length > 0 && (
-          <div class="section-group">
-            <h3 class="section-heading">Exercise Protocols ({entry.exercises.length})</h3>
-            <div class="items-grid">
-              {entry.exercises.map((item) => {
-                const targetUrl = `${areaPath('exercise', item.data.area_id)}#${item.data.id}`;
-                return (
-                  <article
-                    class="clinic-card"
-                    data-search={`${entry.area.name_en} ${item.data.name_en} exercise ${item.data.type || ''}`.toLowerCase()}
-                  >
-                    <div class="card-top">
-                      {item.data.type && <span class={`chip ${item.data.type}`}>{item.data.type.replace(/-/g, ' ')}</span>}
-                      <h4>{item.data.name_en}</h4>
-                    </div>
-
-                    <div class="card-dose">
-                      {item.data.hold_seconds && <span>Hold: {item.data.hold_seconds}s</span>}
-                      {item.data.reps && <span>Reps: {item.data.reps}</span>}
-                      {item.data.sets && <span>Sets: {item.data.sets}</span>}
-                    </div>
-
-                    <div class="card-actions">
-                      <button
-                        type="button"
-                        class="btn-card-action btn-copy-link"
-                        data-url={targetUrl}
-                        title="Copy direct exercise link"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                        <span>Copy</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        class="btn-card-action btn-show-qr"
-                        data-name={item.data.name_en}
-                        data-url={targetUrl}
-                        title="Show QR Code"
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <rect x="3" y="3" width="7" height="7"></rect>
-                          <rect x="14" y="3" width="7" height="7"></rect>
-                          <rect x="14" y="14" width="7" height="7"></rect>
-                          <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                        <span>QR</span>
-                      </button>
-
-                      <a
-                        href={targetUrl}
-                        class="btn-card-action btn-open-target"
-                        target="_blank"
-                        rel="noopener"
-                        title="Open in patient view"
-                      >
-                        <span>Open</span>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                          <polyline points="15 3 21 3 21 9"></polyline>
-                          <line x1="10" y1="14" x2="21" y2="3"></line>
-                        </svg>
-                      </a>
-                    </div>
-                  </article>
-                );
-              })}
+            <div class="area-actions">
+              <button
+                type="button"
+                class="btn-action btn-share-area"
+                data-name={`${entry.area.name_en} Area Handbook`}
+                data-url={`/area/${entry.area.area_id}`}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="7" height="7" />
+                  <rect x="14" y="3" width="7" height="7" />
+                  <rect x="14" y="14" width="7" height="7" />
+                  <rect x="3" y="14" width="7" height="7" />
+                </svg>
+                <span>QR & Link</span>
+              </button>
+              <a
+                href={`/area/${entry.area.area_id}`}
+                class="btn-action btn-view"
+                target="_blank"
+                rel="noopener"
+              >
+                <span>View Area</span>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                  <polyline points="15 3 21 3 21 9" />
+                  <line x1="10" y1="14" x2="21" y2="3" />
+                </svg>
+              </a>
             </div>
-          </div>
-        )}
-      </section>
-    ))}
+          </header>
+
+          {entry.stretches.length > 0 && (
+            <div class="section-group">
+              <h3 class="section-heading">Stretching ({entry.stretches.length})</h3>
+              <div class="items-grid">
+                {entry.stretches.map((item) => {
+                  const targetUrl = `${areaPath('stretching', item.data.area_id)}#${item.data.id}`;
+                  return (
+                    <article
+                      class="clinic-card"
+                      data-search={`${entry.area.name_en} ${item.data.name_en} stretching ${item.data.type || ''}`.toLowerCase()}
+                    >
+                      <div class="card-top">
+                        {item.data.type && (
+                          <span class={`chip ${item.data.type}`}>
+                            {item.data.type.replace(/-/g, ' ')}
+                          </span>
+                        )}
+                        <h4>{item.data.name_en}</h4>
+                      </div>
+
+                      <div class="card-dose">
+                        {item.data.hold_seconds && <span>Hold: {item.data.hold_seconds}s</span>}
+                        {item.data.reps && <span>Reps: {item.data.reps}</span>}
+                        {item.data.sets && <span>Sets: {item.data.sets}</span>}
+                      </div>
+
+                      <div class="card-actions">
+                        <button
+                          type="button"
+                          class="btn-card-action btn-copy-link"
+                          data-url={targetUrl}
+                          title="Copy direct exercise link"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                          <span>Copy</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          class="btn-card-action btn-show-qr"
+                          data-name={item.data.name_en}
+                          data-url={targetUrl}
+                          title="Show QR Code"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <rect x="3" y="3" width="7" height="7" />
+                            <rect x="14" y="3" width="7" height="7" />
+                            <rect x="14" y="14" width="7" height="7" />
+                            <rect x="3" y="14" width="7" height="7" />
+                          </svg>
+                          <span>QR</span>
+                        </button>
+
+                        <a
+                          href={targetUrl}
+                          class="btn-card-action btn-open-target"
+                          target="_blank"
+                          rel="noopener"
+                          title="Open in patient view"
+                        >
+                          <span>Open</span>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                        </a>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {entry.exercises.length > 0 && (
+            <div class="section-group">
+              <h3 class="section-heading">Exercise Protocols ({entry.exercises.length})</h3>
+              <div class="items-grid">
+                {entry.exercises.map((item) => {
+                  const targetUrl = `${areaPath('exercise', item.data.area_id)}#${item.data.id}`;
+                  return (
+                    <article
+                      class="clinic-card"
+                      data-search={`${entry.area.name_en} ${item.data.name_en} exercise ${item.data.type || ''}`.toLowerCase()}
+                    >
+                      <div class="card-top">
+                        {item.data.type && (
+                          <span class={`chip ${item.data.type}`}>
+                            {item.data.type.replace(/-/g, ' ')}
+                          </span>
+                        )}
+                        <h4>{item.data.name_en}</h4>
+                      </div>
+
+                      <div class="card-dose">
+                        {item.data.hold_seconds && <span>Hold: {item.data.hold_seconds}s</span>}
+                        {item.data.reps && <span>Reps: {item.data.reps}</span>}
+                        {item.data.sets && <span>Sets: {item.data.sets}</span>}
+                      </div>
+
+                      <div class="card-actions">
+                        <button
+                          type="button"
+                          class="btn-card-action btn-copy-link"
+                          data-url={targetUrl}
+                          title="Copy direct exercise link"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                          <span>Copy</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          class="btn-card-action btn-show-qr"
+                          data-name={item.data.name_en}
+                          data-url={targetUrl}
+                          title="Show QR Code"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <rect x="3" y="3" width="7" height="7" />
+                            <rect x="14" y="3" width="7" height="7" />
+                            <rect x="14" y="14" width="7" height="7" />
+                            <rect x="3" y="14" width="7" height="7" />
+                          </svg>
+                          <span>QR</span>
+                        </button>
+
+                        <a
+                          href={targetUrl}
+                          class="btn-card-action btn-open-target"
+                          target="_blank"
+                          rel="noopener"
+                          title="Open in patient view"
+                        >
+                          <span>Open</span>
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                          </svg>
+                        </a>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </section>
+      ))
+    }
   </div>
 
   <div id="clinicEmptyState" class="empty-state" style="display: none;">
@@ -275,6 +363,37 @@ const catalog = Array.from(areaMap.values()).filter(
 </Base>
 
 <style>
+  /* Decorative banner for the hand-off screen. aria-hidden by construction: an
+     empty alt on a non-link image is how HTML says "carry no meaning", and this
+     picture is scene-setting, not instruction. */
+  .clinic-header {
+    position: relative;
+    overflow: hidden;
+  }
+  .clinic-art {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: min(46%, 420px);
+    block-size: 100%;
+    object-fit: cover;
+    object-position: 70% 50%;
+    opacity: 0.5;
+    mask-image: linear-gradient(to left, #000 30%, transparent);
+    -webkit-mask-image: linear-gradient(to left, #000 30%, transparent);
+    pointer-events: none;
+  }
+  @media (max-width: 700px) {
+    .clinic-art {
+      inline-size: 62%;
+      opacity: 0.34;
+    }
+  }
+  @media print {
+    .clinic-art {
+      display: none;
+    }
+  }
   .clinic-header {
     padding: 12px 0 20px;
   }
@@ -465,10 +584,22 @@ const catalog = Array.from(areaMap.values()).filter(
     padding: 2px 7px;
     border-radius: 999px;
   }
-  .chip.mobility { background: var(--mobility-bg); color: var(--mobility); }
-  .chip.activation { background: var(--mobility-bg); color: var(--mobility); }
-  .chip.stretch { background: var(--stretch-bg); color: var(--stretch); }
-  .chip.strengthening { background: var(--strengthen-bg); color: var(--strengthen); }
+  .chip.mobility {
+    background: var(--mobility-bg);
+    color: var(--mobility);
+  }
+  .chip.activation {
+    background: var(--mobility-bg);
+    color: var(--mobility);
+  }
+  .chip.stretch {
+    background: var(--stretch-bg);
+    color: var(--stretch);
+  }
+  .chip.strengthening {
+    background: var(--strengthen-bg);
+    color: var(--strengthen);
+  }
 
   .clinic-card h4 {
     font-family: var(--f-display);

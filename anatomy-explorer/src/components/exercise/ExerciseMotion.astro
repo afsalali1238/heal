@@ -1,7 +1,10 @@
 ---
 import type { MotionAsset } from '../../lib/motion/motion-registry';
 
-interface Props { asset: MotionAsset; title: string; }
+interface Props {
+  asset: MotionAsset;
+  title: string;
+}
 const { asset, title } = Astro.props;
 ---
 
@@ -31,27 +34,121 @@ const { asset, title } = Astro.props;
     const reset = root.querySelector<HTMLButtonElement>('[data-reset]')!;
     const status = root.querySelector<HTMLElement>('[data-status]')!;
     const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const sync = () => { play.disabled = !video.paused; pause.disabled = video.paused; };
+    const sync = () => {
+      play.disabled = !video.paused;
+      pause.disabled = video.paused;
+    };
     const doPlay = async () => {
-      try { await video.play(); status.textContent = 'Prototype movement playing.'; }
-      catch { status.textContent = 'The prototype movement could not be played. The poster remains available.'; }
+      try {
+        await video.play();
+        status.textContent = 'Prototype movement playing.';
+      } catch {
+        status.textContent =
+          'The prototype movement could not be played. The poster remains available.';
+      }
       sync();
     };
     play.addEventListener('click', doPlay);
-    pause.addEventListener('click', () => { video.pause(); status.textContent = 'Prototype movement paused.'; sync(); });
-    replay.addEventListener('click', () => { video.currentTime = 0; void doPlay(); });
-    reset.addEventListener('click', () => { video.pause(); video.currentTime = 0; video.load(); status.textContent = 'Poster shown. Press Play to view the prototype.'; sync(); });
-    video.addEventListener('ended', () => { status.textContent = 'Prototype movement finished. Press Replay to watch again.'; sync(); });
-    video.addEventListener('error', () => { status.textContent = 'The prototype movement failed to load. The poster remains available.'; sync(); });
-    document.addEventListener('visibilitychange', () => { if (document.hidden && !video.paused) { video.pause(); status.textContent = 'Prototype movement paused because the page is hidden.'; sync(); } });
-    if ('IntersectionObserver' in window) new IntersectionObserver((entries) => {
-      if (!entries[0]?.isIntersecting && !video.paused) { video.pause(); status.textContent = 'Prototype movement paused because it left the screen.'; sync(); }
-    }, { threshold: .15 }).observe(root);
-    if (reducedMotion) status.textContent = 'Reduced motion is enabled. The poster is shown until you explicitly press Play.';
+    pause.addEventListener('click', () => {
+      video.pause();
+      status.textContent = 'Prototype movement paused.';
+      sync();
+    });
+    replay.addEventListener('click', () => {
+      video.currentTime = 0;
+      void doPlay();
+    });
+    reset.addEventListener('click', () => {
+      video.pause();
+      video.currentTime = 0;
+      video.load();
+      status.textContent = 'Poster shown. Press Play to view the prototype.';
+      sync();
+    });
+    video.addEventListener('ended', () => {
+      status.textContent = 'Prototype movement finished. Press Replay to watch again.';
+      sync();
+    });
+    video.addEventListener('error', () => {
+      status.textContent = 'The prototype movement failed to load. The poster remains available.';
+      sync();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && !video.paused) {
+        video.pause();
+        status.textContent = 'Prototype movement paused because the page is hidden.';
+        sync();
+      }
+    });
+    if ('IntersectionObserver' in window)
+      new IntersectionObserver(
+        (entries) => {
+          if (!entries[0]?.isIntersecting && !video.paused) {
+            video.pause();
+            status.textContent = 'Prototype movement paused because it left the screen.';
+            sync();
+          }
+        },
+        { threshold: 0.15 }
+      ).observe(root);
+    if (reducedMotion)
+      status.textContent =
+        'Reduced motion is enabled. The poster is shown until you explicitly press Play.';
     sync();
   }
 </script>
 
 <style>
-.motion{border:2px solid #b45309;border-radius:16px;padding:18px;background:var(--surface);display:grid;gap:14px}.prototype{background:#fff7ed;color:#7c2d12;padding:9px 12px;font-weight:800;text-align:center}.motion h2{font:700 calc(24px * var(--scale)) var(--f-display);margin:0}.motion video{display:block;width:100%;aspect-ratio:1/1;max-height:560px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:12px}.controls{display:flex;flex-wrap:wrap;gap:8px}.controls button{min-height:44px;padding:9px 16px;border:1px solid var(--line);border-radius:9px;background:var(--surface-2);color:var(--ink);font:600 calc(15px * var(--scale)) var(--f-display);cursor:pointer}.controls button:disabled{opacity:.45;cursor:not-allowed}.motion p{margin:0;color:var(--ink-2)}
+  .motion {
+    border: 2px solid #b45309;
+    border-radius: 16px;
+    padding: 18px;
+    background: var(--surface);
+    display: grid;
+    gap: 14px;
+  }
+  .prototype {
+    background: #fff7ed;
+    color: #7c2d12;
+    padding: 9px 12px;
+    font-weight: 800;
+    text-align: center;
+  }
+  .motion h2 {
+    font: 700 calc(24px * var(--scale)) var(--f-display);
+    margin: 0;
+  }
+  .motion video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1/1;
+    max-height: 560px;
+    object-fit: contain;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .controls button {
+    min-height: 44px;
+    padding: 9px 16px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface-2);
+    color: var(--ink);
+    font: 600 calc(15px * var(--scale)) var(--f-display);
+    cursor: pointer;
+  }
+  .controls button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .motion p {
+    margin: 0;
+    color: var(--ink-2);
+  }
 </style>

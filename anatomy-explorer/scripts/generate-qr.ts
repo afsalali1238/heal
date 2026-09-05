@@ -5,7 +5,7 @@ import QRCode from 'qrcode';
 async function generateQRCodes() {
   const BASE_URL = 'https://physioapp-nine.vercel.app';
   const outDir = path.join(process.cwd(), 'build-artifacts', 'qr');
-  
+
   if (!fs.existsSync(outDir)) {
     fs.mkdirSync(outDir, { recursive: true });
   }
@@ -25,7 +25,7 @@ async function generateQRCodes() {
   const publishedAreas = areas.filter(
     (a: any) => a.status === 'published' && publishedItemKeys.has(`${a.section}/${a.area_id}`)
   );
-  
+
   const sheetItems: string[] = [];
 
   for (const area of publishedAreas) {
@@ -33,20 +33,20 @@ async function generateQRCodes() {
     const url = `${BASE_URL}/${secPath}/${area.area_id}`;
     const filename = `${secPath}-${area.area_id}.png`;
     const dest = path.join(outDir, filename);
-    
+
     await QRCode.toFile(dest, url, {
       width: 300,
       margin: 2,
       color: {
         dark: '#12433A', // Brand color
-        light: '#FFFFFF'
-      }
+        light: '#FFFFFF',
+      },
     });
     console.log(`Generated QR for ${area.name_en} -> ${filename}`);
-    
+
     // Convert image to base64 for embedding in the HTML sheet
     const b64 = fs.readFileSync(dest).toString('base64');
-    
+
     sheetItems.push(`
       <div class="qr-item">
         <h2>${area.name_en}</h2>
@@ -56,7 +56,7 @@ async function generateQRCodes() {
       </div>
     `);
   }
-  
+
   const htmlSheet = `
     <!DOCTYPE html>
     <html lang="en">
@@ -88,7 +88,7 @@ async function generateQRCodes() {
     </body>
     </html>
   `;
-  
+
   fs.writeFileSync(path.join(outDir, 'contact-sheet.html'), htmlSheet);
   console.log(`\nGenerated contact sheet at build-artifacts/qr/contact-sheet.html`);
 }
